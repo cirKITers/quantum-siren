@@ -4,23 +4,31 @@ version = "0.1.0"
 description = ""
 authors = ["lc3267 <melvin.strobl@kit.edu>"]
 readme = "README.md"
-packages = [{include = "quantum_siren"}]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.9"
 pennylane = "^0.31.0"
 pillow = "^10.0.0"
 scikit-image = "^0.21.0"
 ipykernel = "^6.25.0"
-torchvision = "^0.15.2+cpu"
 matplotlib = "^3.7.2"
-
+torchvision = [
+    {version = "^0.15.2+cpu", source = "torch_cpu", markers = "extra == 'cpu'"},
+    {version = "^0.15.2", source = "torch_gpu", markers = "extra == 'gpu'"}
+]
+torchsummary = "^1.5.1"
 
 [[tool.poetry.source]]
-name = "torch"
+name = "torch_cpu"
 url = "https://download.pytorch.org/whl/cpu"
-default = false
-secondary = true
+
+[[tool.poetry.source]]
+name = "torch_gpu"
+url = "https://download.pytorch.org/whl/cu118"
+
+[tool.poetry.extras]
+cpu=["torchvision"]
+gpu=["torchvision"]
 
 [build-system]
 requires = ["poetry-core"]
