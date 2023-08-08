@@ -89,7 +89,7 @@ class Instructor():
                 fig.update_layout(
                     yaxis=dict(
                         scaleanchor='x',
-                        autoarrange='reversed'
+                        autorange='reversed'
                     ),
                     plot_bgcolor='rgba(0,0,0,0)'
                 )
