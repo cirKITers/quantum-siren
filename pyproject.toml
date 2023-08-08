@@ -6,7 +6,7 @@ authors = ["lc3267 <melvin.strobl@kit.edu>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.9,<3.11"
 pennylane = "^0.31.0"
 pillow = "^10.0.0"
 scikit-image = "^0.21.0"

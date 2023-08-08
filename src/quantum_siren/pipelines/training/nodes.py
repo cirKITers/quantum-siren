@@ -2,13 +2,15 @@
 This is a boilerplate pipeline 'training'
 generated using Kedro 0.18.12
 """
+from multiprocessing import Pool
+
 import pennylane as qml
 from pennylane import numpy as np
 
 import torch
 from torchmetrics.image import StructuralSimilarityIndexMeasure
 
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 from .ansaetze import ansaetze
 
@@ -38,7 +40,7 @@ class Instructor():
     def circuit(self, params, coord):
         for l, l_params in enumerate(params):
             if l == 0 or (l > 0 and self.data_reupload):
-                self.iec(torch.stack([coord]*(self.n_qubits//2))) # half because the coordinates already have 2 dims
+                self.iec(torch.stack([coord]*(self.n_qubits//2)), limit=self.n_qubits-(l//2)) # half because the coordinates already have 2 dims
 
             self.vqc(l_params)
 
@@ -46,6 +48,10 @@ class Instructor():
 
     def cost(self, model_input, params):
         out = torch.zeros(size=[model_input.shape[0],])
+
+        # with Pool(processes=4) as pool:
+        #     out = pool.starmap(self.qnode, [[params, coord] for coord in model_input])
+        
         for i, coord in enumerate(model_input):
             # out[i] = torch.mean(torch.stack(circuit(params, coord)), axis=0)
             out[i] = self.qnode(params, coord)[-1]
@@ -72,16 +78,23 @@ class Instructor():
             loss_val = self.mse(model_output, ground_truth)
             ssim_val = self.ssim(model_output, ground_truth)
 
-            mlflow.log_metric("Loss", loss_val.item())
-            mlflow.log_metric("SSIM", ssim_val)
+            mlflow.log_metric("Loss", loss_val.item(), step)
+            mlflow.log_metric("SSIM", ssim_val, step)
             if not step % self.steps_till_summary:
                 # print(self.params)
                 # print(f"Step {step}:\t Loss: {loss_val.item()}\t SSIM: {ssim_val}")
+                fig = go.Figure(data =
+                    go.Heatmap(z = model_output.cpu().view(14,14).detach().numpy())
+                )
+                fig.update_layout(
+                    yaxis=dict(
+                        scaleanchor='x',
+                        autoarrange='reversed'
+                    ),
+                    plot_bgcolor='rgba(0,0,0,0)'
+                )
 
-                fig, axes = plt.subplots(1,3, figsize=(18,6))
-                axes[0].imshow(model_output.cpu().view(14,14).detach().numpy())
-
-                mlflow.log_figure(fig, f"prediction_step_{step}.png")
+                mlflow.log_figure(fig, f"prediction_step_{step}.html")
                 # print(f"Params: {params}")
                 # img_grad = gradient(model_output, coords)
                 # img_laplacian = laplace(model_output, coords)
@@ -92,8 +105,7 @@ class Instructor():
                 # plt.show()
 
             self.optim.zero_grad()
-            metric = -ssim_val
-            metric.backward()
+            loss_val.backward()
             self.optim.step()
 
 
