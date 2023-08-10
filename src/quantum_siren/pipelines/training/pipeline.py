@@ -28,7 +28,8 @@ def create_pipeline(**kwargs) -> Pipeline:
             "instructor":"instructor",
             "model_input":"coordinates",    
             "ground_truth":"values",
-            "steps":"params:steps"
+            "steps":"params:steps",
+            "report_figure_every_n_steps":"params:report_figure_every_n_steps"
         },
         outputs={
             "result":"result"

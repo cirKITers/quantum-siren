@@ -69,7 +69,7 @@ class Instructor():
 
         return val
 
-    def train(self, model_input, ground_truth, steps):
+    def train(self, model_input, ground_truth, steps, report_figure_every_n_steps):
         for step in range(steps):
 
             model_output = self.cost(model_input[0], self.params)
@@ -116,8 +116,8 @@ def generate_instructor(n_layers, n_qubits, vqc_ansatz, iec_ansatz, data_reuploa
         "instructor": instructor
     }
 
-def training(instructor, model_input, ground_truth, steps):
-    result = instructor.train(model_input, ground_truth, steps)
+def training(instructor, model_input, ground_truth, steps, report_figure_every_n_steps):
+    result = instructor.train(model_input, ground_truth, steps, report_figure_every_n_steps)
 
     return {
         "result": "result"
