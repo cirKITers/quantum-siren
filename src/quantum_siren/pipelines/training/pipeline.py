@@ -4,7 +4,7 @@ generated using Kedro 0.18.12
 """
 
 from kedro.pipeline import Pipeline, pipeline, node
-from .nodes import training, generate_instructor
+from .nodes import training, generate_instructor, plot_ground_truth
 
 def create_pipeline(**kwargs) -> Pipeline:
     nd_generate_instructor = node(
@@ -22,6 +22,15 @@ def create_pipeline(**kwargs) -> Pipeline:
             "instructor":"instructor"
         }
     )
+    nd_plot_ground_truth = node(
+        plot_ground_truth,
+        inputs={
+            "ground_truth":"values",
+        },
+        outputs={
+            "result":"result"
+        }
+    )
     nd_training = node(
         training,
         inputs={
@@ -37,6 +46,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
     return pipeline(
         [
+            nd_plot_ground_truth,
             nd_generate_instructor,
             nd_training
         ],
