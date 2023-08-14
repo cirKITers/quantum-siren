@@ -28,7 +28,6 @@ def create_pipeline(**kwargs) -> Pipeline:
             "ground_truth":"values",
         },
         outputs={
-            "result":"result"
         }
     )
     nd_training = node(

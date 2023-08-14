@@ -138,7 +138,6 @@ def plot_ground_truth(ground_truth):
     mlflow.log_figure(fig, f"ground_truth.html")
 
     return {
-        "result": "result"
     }
 
 def training(instructor, model_input, ground_truth, steps, report_figure_every_n_steps):
