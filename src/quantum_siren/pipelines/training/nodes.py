@@ -10,6 +10,8 @@ from pennylane import numpy as np
 import torch
 from torchmetrics.image import StructuralSimilarityIndexMeasure
 
+import math
+
 import plotly.graph_objects as go
 
 from .ansaetze import ansaetze
@@ -59,8 +61,10 @@ class Instructor():
         return out
 
     def ssim(self, pred, target):
+        sidelength = int(math.sqrt(target.shape[1]))
+
         ssim = StructuralSimilarityIndexMeasure(data_range=1.0)
-        val = ssim(pred.reshape(1, 1, 14, 14), target.reshape(1, 1, 14, 14))
+        val = ssim(pred.reshape(1, 1, sidelength, sidelength), target.reshape(1, 1, sidelength, sidelength))
 
         return val
 
@@ -70,6 +74,8 @@ class Instructor():
         return val
 
     def train(self, model_input, ground_truth, steps, report_figure_every_n_steps):
+        sidelength = int(math.sqrt(ground_truth.shape[1]))
+
         for step in range(steps):
 
             model_output = self.cost(model_input[0], self.params)
@@ -84,7 +90,7 @@ class Instructor():
                 # print(self.params)
                 # print(f"Step {step}:\t Loss: {loss_val.item()}\t SSIM: {ssim_val}")
                 fig = go.Figure(data =
-                    go.Heatmap(z = model_output.cpu().view(14,14).detach().numpy())
+                    go.Heatmap(z = model_output.cpu().view(sidelength, sidelength).detach().numpy())
                 )
                 fig.update_layout(
                     yaxis=dict(
@@ -117,8 +123,9 @@ def generate_instructor(n_layers, n_qubits, vqc_ansatz, iec_ansatz, data_reuploa
     }
 
 def plot_ground_truth(ground_truth):
+    sidelength = int(math.sqrt(ground_truth.shape[1]))
     fig = go.Figure(data =
-        go.Heatmap(z = ground_truth.view(14,14).detach().numpy())
+        go.Heatmap(z = ground_truth.view(sidelength, sidelength).detach().numpy())
     )
     fig.update_layout(
         yaxis=dict(
