@@ -19,6 +19,9 @@ torchvision = [
 kedro = "^0.18.12"
 torchsummary = "^1.5.1"
 torchmetrics = "^1.0.2"
+kedro-mlflow = "^0.11.9"
+plotly = "^5.15.0"
+dask = "^2023.8.0"
 
 [[tool.poetry.source]]
 name = "torch_cpu"
