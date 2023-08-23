@@ -6,7 +6,7 @@ In case of the latter, the input would be the coordinate of a pixel and the outp
 
 ## Approach :pencil:
 
-The current ansatz is the (un-)famous ‘Circuit 19’ approach from https://arxiv.org/abs/1905.10876.
+The current ansatz is the (un-)famous ‘Circuit 19’ approach from [2].
 Data is encoded across all Qubits (i.e. Qubit 0 ← X coordinate, Qubit 1 ← Y coordinate, Qubit 2 ← X coordinate, …) using RY gates and Data-Reuploading.
 Initially I tried without data-reuploading but this resulted in a continuous color gradient across the whole image (barely any training effect):
 - The main motivation for data-reuploading is, that, according to the paper, the number of encoding circuits determines the frequency in the function that the VQC can approximate
@@ -57,3 +57,5 @@ The following parameters can be adjusted:
 ## Literature :books:
 
 [1]: [Implicit Neural Representations with Periodic Activation Functions](https://doi.org/10.48550/arXiv.2006.09661)
+[2]: [Expressibility and entangling capability of parameterized quantum circuits for hybrid quantum-classical algorithms
+](https://doi.org/10.1002/qute.201900070)
