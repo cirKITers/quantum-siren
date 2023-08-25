@@ -14,11 +14,7 @@ def upscaling(model, coordinates, factor):
     upscaled_coordinates = torch.tensor(rescale(coordinates.numpy(), [factor**2, 1]))
     sidelength = int(math.sqrt(upscaled_coordinates.shape[0]))
 
-    model_output = torch.zeros(size=[upscaled_coordinates.shape[0],])
-    
-    for i, coord in enumerate(upscaled_coordinates):
-        # out[i] = torch.mean(torch.stack(circuit(params, coord)), axis=0)
-        model_output[i] = model(coord)
+    model_output = model(upscaled_coordinates)
 
     fig = go.Figure(data =
                     go.Heatmap(z = model_output.cpu().view(sidelength, sidelength).detach().numpy())
