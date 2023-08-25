@@ -38,4 +38,9 @@ class Model(mlflow.pyfunc.PythonModel, torch.nn.Module):
             self.vqc(l_params)
 
         return [qml.expval(qml.PauliZ(i)) for i in range(self.n_qubits)]
+
+    def predict(self, context, model_input):
+        if type(model_input) != torch.Tensor:
+            model_input = torch.tensor(model_input)
+        return self.forward(model_input)
         
