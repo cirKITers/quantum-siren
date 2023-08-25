@@ -72,10 +72,11 @@ def minmax_scaler(data, min_norm, max_norm):
 
 def transform_data(dataloader, nonlinear_coords, img_val_min, img_val_max):
     coordinates, values = next(iter(dataloader))
+    coordinates = coordinates.reshape(-1, 2)
 
     # scale the model input between 0..pi
     if nonlinear_coords:
-        coordinates[0] = (torch.asin(coordinates[0])+torch.pi/2)/2
+        coordinates = (torch.asin(coordinates)+torch.pi/2)/2
 
     # scale the data between -1..1 (yeah, I know that's ugly)
     # values = 2/(torch.abs(values.max() - values.min())) * (-values.min() + values) - 1

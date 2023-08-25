@@ -54,8 +54,8 @@ class Instructor():
 
         for step in range(steps):
 
-            model_output = self.cost(model_input[0])
-            model_output = model_output.reshape((1, model_output.shape[0], 1))
+            model_output = self.cost(model_input)
+            model_output = model_output.reshape((1, -1, 1))
 
             loss_val = self.mse(model_output, ground_truth)
             ssim_val = self.ssim(model_output, ground_truth)
@@ -122,7 +122,7 @@ def training(instructor, model_input, ground_truth, steps, report_figure_every_n
     model = instructor.train(model_input, ground_truth, steps, report_figure_every_n_steps)
 
     logging.info("Logging Model to MlFlow")
-    mlflow.pyfunc.log_model(python_model=model, artifact_path="qameraman", input_example=model_input.numpy()[0][0])
+    mlflow.pyfunc.log_model(python_model=model, artifact_path="qameraman", input_example=model_input.numpy()[0])
 
     return {
         "model": model
