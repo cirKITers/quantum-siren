@@ -21,8 +21,8 @@ class Model(mlflow.pyfunc.PythonModel, torch.nn.Module):
         self.data_reupload = data_reupload
 
         dev = qml.device("default.qubit", wires=self.n_qubits, shots=self.shots)
-        self.forward = qml.QNode(self.circuit, dev, interface="torch")
-        self.predict = self.forward
+        
+        self.qlayer = qml.qnn.TorchLayer(qml.QNode(self.circuit, dev, interface="torch"), {"weights":[n_layers,n_qubits,self.vqc(None)]})
 
         self.initialize_params(n_qubits=self.n_qubits, n_layers=self.n_layers, n_gates_per_layer=self.vqc(None))
 
@@ -30,10 +30,10 @@ class Model(mlflow.pyfunc.PythonModel, torch.nn.Module):
     def initialize_params(self, n_qubits, n_layers, n_gates_per_layer):
         self.params = torch.nn.Parameter(torch.rand(size=(n_layers,n_qubits,n_gates_per_layer), requires_grad=True))
 
-    def circuit(self, model_input):
-        for l, l_params in enumerate(self.params):
+    def circuit(self, inputs, weights):
+        for l, l_params in enumerate(weights):
             if l == 0 or (l > 0 and self.data_reupload):
-                self.iec(torch.stack([model_input]*(self.n_qubits//2)), limit=self.n_qubits-(l//2)) # half because the coordinates already have 2 dims
+                self.iec(torch.stack([inputs]*(self.n_qubits//2)), limit=self.n_qubits-(l//2)) # half because the coordinates already have 2 dims
 
             self.vqc(l_params)
 
