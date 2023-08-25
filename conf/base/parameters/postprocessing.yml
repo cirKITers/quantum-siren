@@ -3,3 +3,6 @@
 #
 # Documentation for this file format can be found in "Parameters"
 # Link: https://docs.kedro.org/en/0.18.12/kedro_project_setup/configuration.html#parameters
+
+postprocessing:
+  upscale_factor: 2

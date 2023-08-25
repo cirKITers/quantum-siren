@@ -13,7 +13,8 @@ def create_pipeline(**kwargs) -> Pipeline:
         upscaling,
         inputs={
             "model":"model",
-            "factor":"params:factor"
+            "coordinates":"coordinates",
+            "factor":"params:upscale_factor"
         },
         outputs={
             "image":"upscaled_image"
@@ -25,6 +26,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             nd_upscaling
         ],
         inputs={
+            "coordinates":"coordinates",
             "model":"model"
         },
         outputs={
