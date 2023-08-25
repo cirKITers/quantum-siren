@@ -2,11 +2,6 @@
 This is a boilerplate pipeline 'training'
 generated using Kedro 0.18.12
 """
-from multiprocessing import Pool
-
-import pennylane as qml
-from pennylane import numpy as np
-
 import torch
 from torchmetrics.image import StructuralSimilarityIndexMeasure
 
@@ -14,38 +9,9 @@ import math
 
 import plotly.graph_objects as go
 
-from .ansaetze import ansaetze
-
 import mlflow
-
-
-class Model(mlflow.pyfunc.PythonModel):
-    def __init__(self, n_qubits, shots, vqc_ansatz, iec_ansatz, n_layers, data_reupload) -> None:
-        self.shots = None if shots=="None" else shots
-        self.n_qubits = n_qubits
-        self.n_layers = n_layers
-
-        self.iec = getattr(ansaetze, iec_ansatz, ansaetze.nothing)
-        self.vqc = getattr(ansaetze, vqc_ansatz, ansaetze.nothing)
-        
-        self.data_reupload = data_reupload
-
-        dev = qml.device("default.qubit", wires=self.n_qubits, shots=self.shots)
-        self.predict = qml.QNode(self.circuit, dev, interface="torch")
-
-        self.params = self.initialize_params(n_qubits=self.n_qubits, n_layers=self.n_layers, n_gates_per_layer=self.vqc(None))
-
-    def initialize_params(self, n_qubits, n_layers, n_gates_per_layer):
-        return torch.rand(size=(n_layers,n_qubits,n_gates_per_layer), requires_grad=True)
-
-    def circuit(self, model_input):
-        for l, l_params in enumerate(self.params):
-            if l == 0 or (l > 0 and self.data_reupload):
-                self.iec(torch.stack([model_input]*(self.n_qubits//2)), limit=self.n_qubits-(l//2)) # half because the coordinates already have 2 dims
-
-            self.vqc(l_params)
-
-        return [qml.expval(qml.PauliZ(i)) for i in range(self.n_qubits)]
+import logging
+from .models import Model
 
 
 class Instructor():
@@ -55,7 +21,7 @@ class Instructor():
         self.steps_till_summary = 10
         
         self.model = Model(n_qubits, shots, vqc_ansatz, iec_ansatz, n_layers, data_reupload)
-        self.optim = torch.optim.Adam(lr=learning_rate, params=[self.model.params])
+        self.optim = torch.optim.Adam(lr=learning_rate, params=self.model.parameters())
     
 
     def cost(self, model_input):
@@ -155,6 +121,7 @@ def plot_ground_truth(ground_truth):
 def training(instructor, model_input, ground_truth, steps, report_figure_every_n_steps):
     model = instructor.train(model_input, ground_truth, steps, report_figure_every_n_steps)
 
+    logging.info("Logging Model to MlFlow")
     mlflow.pyfunc.log_model(python_model=model, artifact_path="qameraman", input_example=model_input.numpy()[0][0])
 
     return {
