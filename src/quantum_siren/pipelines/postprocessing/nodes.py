@@ -30,6 +30,6 @@ def upscaling(model, coordinates, factor):
     mlflow.log_figure(fig, f"{factor}x_upscaled_prediction.html")
 
     return {
-        "upscaled_image":model_output,
+        "upscaled_image":model_output.numpy(),
         "upscaled_coordinates":upscaled_coordinates
     }
