@@ -55,6 +55,6 @@ def create_pipeline(**kwargs) -> Pipeline:
         },
         outputs={
             "model":"model"
-        }
+        },
         namespace="training"
     )
