@@ -25,16 +25,7 @@ class Instructor():
     
 
     def cost(self, model_input):
-        out = torch.zeros(size=[model_input.shape[0],])
-
-        # with Pool(processes=4) as pool:
-        #     out = pool.starmap(self.qnode, [[params, coord] for coord in model_input])
-        
-        for i, coord in enumerate(model_input):
-            # out[i] = torch.mean(torch.stack(circuit(params, coord)), axis=0)
-            out[i] = self.model.predict(coord)[-1]
-
-        return out
+        return self.model(model_input)
 
     def ssim(self, pred, target):
         sidelength = int(math.sqrt(target.shape[1]))
@@ -122,7 +113,7 @@ def training(instructor, model_input, ground_truth, steps, report_figure_every_n
     model = instructor.train(model_input, ground_truth, steps, report_figure_every_n_steps)
 
     logging.info("Logging Model to MlFlow")
-    mlflow.pyfunc.log_model(python_model=model, artifact_path="qameraman", input_example=model_input.numpy()[0]) #TODO: when debugging, this step actually throws an exception, but seems to work.. 
+    mlflow.pyfunc.log_model(python_model=model, artifact_path="qameraman", input_example=model_input.numpy()[0])
 
     return {
         "model": model

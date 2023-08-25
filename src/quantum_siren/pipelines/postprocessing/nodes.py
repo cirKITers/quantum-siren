@@ -18,7 +18,7 @@ def upscaling(model, coordinates, factor):
     
     for i, coord in enumerate(upscaled_coordinates):
         # out[i] = torch.mean(torch.stack(circuit(params, coord)), axis=0)
-        model_output[i] = model.predict(coord)[-1]
+        model_output[i] = model(coord)[-1]
 
     fig = go.Figure(data =
                     go.Heatmap(z = model_output.cpu().view(sidelength, sidelength).detach().numpy())
