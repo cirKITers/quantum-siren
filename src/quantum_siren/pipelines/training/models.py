@@ -44,3 +44,19 @@ class Model(mlflow.pyfunc.PythonModel, torch.nn.Module):
             model_input = torch.tensor(model_input)
         return self.forward(model_input)
         
+    def forward(self, model_input):
+        # return self.qlayer(model_input)
+
+        if model_input.ndim == 2:
+            out = torch.zeros(size=[model_input.shape[0],])
+
+            # with Pool(processes=4) as pool:
+            #     out = pool.starmap(self.qnode, [[params, coord] for coord in model_input])
+            
+            for i, coord in enumerate(model_input):
+                # out[i] = torch.mean(torch.stack(circuit(params, coord)), axis=0)
+                out[i] = self.qlayer(coord)[-1]
+        else:
+            out = self.qlayer(model_input)[-1]
+
+        return out
