@@ -17,7 +17,8 @@ def create_pipeline(**kwargs) -> Pipeline:
             "factor":"params:upscale_factor"
         },
         outputs={
-            "image":"upscaled_image"
+            "upscaled_image":"upscaled_image",
+            "upscaled_coordinates":"upscaled_coordinates"
         }
     )
 
