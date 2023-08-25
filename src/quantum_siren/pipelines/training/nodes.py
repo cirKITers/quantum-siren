@@ -122,7 +122,7 @@ def training(instructor, model_input, ground_truth, steps, report_figure_every_n
     model = instructor.train(model_input, ground_truth, steps, report_figure_every_n_steps)
 
     logging.info("Logging Model to MlFlow")
-    mlflow.pyfunc.log_model(python_model=model, artifact_path="qameraman", input_example=model_input.numpy()[0])
+    mlflow.pyfunc.log_model(python_model=model, artifact_path="qameraman", input_example=model_input.numpy()[0]) #TODO: when debugging, this step actually throws an exception, but seems to work.. 
 
     return {
         "model": model
