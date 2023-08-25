@@ -5,7 +5,6 @@ import torch
 from .ansaetze import ansaetze
 
 import mlflow
-from typing import Any
 
 class Model(mlflow.pyfunc.PythonModel, torch.nn.Module):
     # class Module(torch.nn.Module):
