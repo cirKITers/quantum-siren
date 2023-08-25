@@ -40,7 +40,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             "report_figure_every_n_steps":"params:report_figure_every_n_steps"
         },
         outputs={
-            "result":"result"
+            "model":"model"
         }
     )
     return pipeline(

@@ -158,5 +158,5 @@ def training(instructor, model_input, ground_truth, steps, report_figure_every_n
     mlflow.pyfunc.log_model(python_model=model, artifact_path="qameraman", input_example=model_input.numpy()[0][0])
 
     return {
-        "result": model
+        "model": model
     }
