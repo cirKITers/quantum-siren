@@ -53,5 +53,8 @@ def create_pipeline(**kwargs) -> Pipeline:
             "coordinates":"coordinates",
             "values":"values"
         },
+        outputs={
+            "model":"model"
+        }
         namespace="training"
     )
