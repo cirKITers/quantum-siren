@@ -1,4 +1,5 @@
 mlruns
+.mlruns_bckp
 
 ##########################
 # KEDRO PROJECT
