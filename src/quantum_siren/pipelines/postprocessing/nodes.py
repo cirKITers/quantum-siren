@@ -40,3 +40,27 @@ def upscaling(model, coordinates, factor):
         "upscaled_image":model_output.detach().numpy(),
         "upscaled_coordinates":upscaled_coordinates
     }
+
+def pixelwise_difference(model, coordinates, ground_truth):
+    sidelength = int(math.sqrt(coordinates.shape[0]))
+
+    model_output = model(coordinates)
+
+    difference = model_output - ground_truth.view(sidelength**2)
+
+    fig = go.Figure(data =
+                    go.Heatmap(z = difference.cpu().view(sidelength, sidelength).detach().numpy())
+                )
+
+    fig.update_layout(
+        yaxis=dict(
+            scaleanchor='x',
+            autorange='reversed'
+        ),
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+
+    mlflow.log_figure(fig, f"pixelwise_differences.html")
+
+    return {
+    }
