@@ -64,3 +64,35 @@ def pixelwise_difference(model, coordinates, ground_truth):
 
     return {
     }
+
+def plot_gradients(model, coordinates, ground_truth):
+    sidelength = int(math.sqrt(coordinates.shape[0]))
+
+    coordinates.requires_grad = True
+    model_output = model(coordinates)
+
+    model_output_grad = torch.autograd.grad(outputs=model_output.sum(), inputs=coordinates, grad_outputs=None) #same shape as coordinates
+
+
+    # for pixel in model_output:
+    #     pixel.backward(retain_graph=True)
+
+    
+    # difference = model_output - ground_truth.view(sidelength**2)
+
+    # fig = go.Figure(data =
+    #                 go.Heatmap(z = difference.cpu().view(sidelength, sidelength).detach().numpy())
+    #             )
+
+    # fig.update_layout(
+    #     yaxis=dict(
+    #         scaleanchor='x',
+    #         autorange='reversed'
+    #     ),
+    #     plot_bgcolor='rgba(0,0,0,0)'
+    # )
+
+    # mlflow.log_figure(fig, f"pixelwise_differences.html")
+
+    return {
+    }

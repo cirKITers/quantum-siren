@@ -5,7 +5,7 @@ generated using Kedro 0.18.12
 
 from kedro.pipeline import Pipeline, pipeline, node
 
-from .nodes import upscaling, pixelwise_difference
+from .nodes import upscaling, pixelwise_difference, plot_gradients
 
 def create_pipeline(**kwargs) -> Pipeline:
 
@@ -33,10 +33,22 @@ def create_pipeline(**kwargs) -> Pipeline:
         }
     )
 
+    nd_plot_gradients = node(
+        plot_gradients,
+        inputs={
+            "model":"model",
+            "coordinates":"coordinates",
+            "ground_truth":"values"
+        },
+        outputs={
+        }
+    )
+
     return pipeline(
         [
             nd_upscaling,
-            nd_pixelwise_diff
+            nd_pixelwise_diff,
+            nd_plot_gradients
         ],
         inputs={
             "coordinates":"coordinates",
