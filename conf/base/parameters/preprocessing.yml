@@ -5,7 +5,7 @@
 # Link: https://docs.kedro.org/en/0.18.12/kedro_project_setup/configuration.html#parameters
 
 preprocessing:
-  sidelength: 28
+  sidelength: 14
   batch_size: 1
   pin_memory: True
   num_workers: 0
