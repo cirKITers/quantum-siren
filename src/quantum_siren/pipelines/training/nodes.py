@@ -57,7 +57,7 @@ class Instructor():
                 # print(self.params)
                 # print(f"Step {step}:\t Loss: {loss_val.item()}\t SSIM: {ssim_val}")
                 fig = go.Figure(data =
-                    go.Heatmap(z = model_output.cpu().view(sidelength, sidelength).detach().numpy())
+                    go.Heatmap(z = model_output.cpu().view(sidelength, sidelength).detach().numpy(), colorscale='RdBu', zmid=0)
                 )
                 fig.update_layout(
                     yaxis=dict(
@@ -94,7 +94,7 @@ def generate_instructor(n_layers, n_qubits, vqc_ansatz, iec_ansatz, data_reuploa
 def plot_ground_truth(ground_truth):
     sidelength = int(math.sqrt(ground_truth.shape[1]))
     fig = go.Figure(data =
-        go.Heatmap(z = ground_truth.view(sidelength, sidelength).detach().numpy())
+        go.Heatmap(z = ground_truth.view(sidelength, sidelength).detach().numpy(), colorscale='RdBu', zmid=0)
     )
     fig.update_layout(
         yaxis=dict(
