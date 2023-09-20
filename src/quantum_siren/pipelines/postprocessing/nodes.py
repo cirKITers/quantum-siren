@@ -79,11 +79,11 @@ def plot_gradients(model, coordinates, ground_truth):
 
     pred_dc = torch.autograd.grad(outputs=model_output.sum(), inputs=coordinates, grad_outputs=None, create_graph=True)[0] #same shape as coordinates
 
-    pred_dc_img = grads2img(pred_dc[..., 0], pred_dc[..., 1], sidelength)
+    pred_dc_img = grads2img(pred_dc[..., 0].view(sidelength, sidelength), pred_dc[..., 1].view(sidelength, sidelength), sidelength)
 
     fig = px.imshow(pred_dc_img)
 
-    pred_normed_dc = pred_dc.norm(dim=-1)
+    # pred_normed_dc = pred_dc.norm(dim=-1)
 
     # fig = go.Figure(data =
     #                 go.Heatmap(z = pred_normed_dc.cpu().view(sidelength, sidelength).detach().numpy(), colorscale='RdBu', zmid=0)
@@ -102,12 +102,17 @@ def plot_gradients(model, coordinates, ground_truth):
     #----------------------------------------------------------------    
     # Laplacian Prediction
 
-    pred_dcdc = torch.autograd.grad(outputs=pred_normed_dc.sum(), inputs=coordinates, grad_outputs=None)[0]
+    pred_dcxdc = torch.autograd.grad(outputs=pred_dc[...,0].sum(), inputs=coordinates, grad_outputs=None, retain_graph=True)[0]
+    pred_dcydc = torch.autograd.grad(outputs=pred_dc[...,1].sum(), inputs=coordinates, grad_outputs=None, retain_graph=True)[0]
 
-    pred_normed_dcdc = pred_dcdc.norm(dim=-1)
+    # select dcxdcx and dcydcy (we do not need dcxdcy and dcydcx)
+    pred_dcdc = torch.stack((pred_dcxdc[...,0], pred_dcydc[...,1]), axis=-1)
+
+    # calculate the sum so that it acutally becomes the laplace
+    pred_laplace_dcdc = pred_dcdc.sum(dim=-1)
     
     fig = go.Figure(data =
-                    go.Heatmap(z = pred_normed_dcdc.cpu().view(sidelength, sidelength).detach().numpy(), colorscale='RdBu', zmid=0)
+                    go.Heatmap(z = pred_laplace_dcdc.cpu().view(sidelength, sidelength).detach().numpy(), colorscale='RdBu', zmid=0)
                 )
 
     fig.update_layout(
@@ -153,10 +158,10 @@ def plot_gradients(model, coordinates, ground_truth):
     #----------------------------------------------------------------    
     # Laplacian Ground Truth
 
-    gt_dcdc = scipy.ndimage.laplace(gt_image)
+    gt_laplace_dcdc = scipy.ndimage.laplace(gt_image)
 
     fig = go.Figure(data =
-                    go.Heatmap(z = gt_dcdc, colorscale='RdBu', zmid=0)
+                    go.Heatmap(z = gt_laplace_dcdc, colorscale='RdBu', zmid=0)
                 )
 
     fig.update_layout(
@@ -175,9 +180,12 @@ def plot_gradients(model, coordinates, ground_truth):
 
 def grads2img(grads_x, grads_y, sidelength):
     """
-    From https://github.com/vsitzmann/siren/blob/master/dataio.py#L55
+    Thankfully adapted from https://github.com/vsitzmann/siren/blob/master/dataio.py#L55
     """
-    grads_x, grads_y = torch.from_numpy(grads_x), torch.from_numpy(grads_y)
+    if type(grads_x) == torch.Tensor:
+        grads_x = grads_x.detach().numpy()
+    if type(grads_y) == torch.Tensor:
+        grads_y = grads_y.detach().numpy()
             
     grads_a = np.arctan2(grads_y, grads_x)
     grads_m = np.hypot(grads_y, grads_x)
