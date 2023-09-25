@@ -31,8 +31,11 @@ class Model(mlflow.pyfunc.PythonModel, torch.nn.Module):
         self.params = torch.nn.Parameter(torch.rand(size=(n_layers,n_qubits,n_gates_per_layer), requires_grad=True))
 
     def circuit(self, inputs, weights):
+        dru = torch.zeros(len(weights))
+        dru[::int(1/self.data_reupload)] = 1
+
         for l, l_params in enumerate(weights):
-            if l == 0 or (l > 0 and self.data_reupload):
+            if l == 0 or dru[l]==1:
                 self.iec(torch.stack([inputs]*(self.n_qubits//2)), limit=self.n_qubits-(l//2)) # half because the coordinates already have 2 dims
 
             self.vqc(l_params)
