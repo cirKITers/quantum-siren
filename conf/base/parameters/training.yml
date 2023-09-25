@@ -12,5 +12,5 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   data_reupload: ${data_reupload}
   learning_rate: ${learning_rate}
   shots: ${shots}
-  steps: 800
+  steps: 600
   report_figure_every_n_steps: 20

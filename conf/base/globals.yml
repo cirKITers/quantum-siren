@@ -3,5 +3,5 @@ n_layers: 22
 vqc_ansatz: "circuit_19"
 iec_ansatz: "spread_layers"
 data_reupload: 0.5
-learning_rate: 0.01
+learning_rate: 0.05
 shots: "None"
