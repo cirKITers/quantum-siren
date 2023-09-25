@@ -3,7 +3,7 @@ This is a boilerplate pipeline 'training'
 generated using Kedro 0.18.12
 """
 import torch
-from torchmetrics.image import StructuralSimilarityIndexMeasure
+from torchmetrics.image import StructuralSimilarityIndexMeasure, PeakSignalNoiseRatio
 
 import math
 
@@ -35,6 +35,14 @@ class Instructor():
 
         return val
 
+    def psnr(self, pred, target):
+        sidelength = int(math.sqrt(target.shape[1]))
+
+        psnr = PeakSignalNoiseRatio(data_range=1.0)
+        val = psnr(pred.reshape(1, 1, sidelength, sidelength), target.reshape(1, 1, sidelength, sidelength))
+
+        return val
+
     def mse(self, pred, target):
         val = ((pred - target)**2).mean()
 
@@ -50,9 +58,12 @@ class Instructor():
 
             loss_val = self.mse(model_output, ground_truth)
             ssim_val = self.ssim(model_output, ground_truth)
+            psnr_val = self.psnr(model_output, ground_truth)
 
             mlflow.log_metric("Loss", loss_val.item(), step)
             mlflow.log_metric("SSIM", ssim_val, step)
+            mlflow.log_metric("PSNR", psnr_val, step)
+            
             if not step % self.steps_till_summary:
                 # print(self.params)
                 # print(f"Step {step}:\t Loss: {loss_val.item()}\t SSIM: {ssim_val}")
