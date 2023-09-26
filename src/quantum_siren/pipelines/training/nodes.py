@@ -102,23 +102,7 @@ def generate_instructor(n_layers, n_qubits, vqc_ansatz, iec_ansatz, data_reuploa
         "instructor": instructor
     }
 
-def plot_ground_truth(ground_truth):
-    sidelength = int(math.sqrt(ground_truth.shape[1]))
-    fig = go.Figure(data =
-        go.Heatmap(z = ground_truth.view(sidelength, sidelength).detach().numpy(), colorscale='RdBu', zmid=0)
-    )
-    fig.update_layout(
-        yaxis=dict(
-            scaleanchor='x',
-            autorange='reversed'
-        ),
-        plot_bgcolor='rgba(0,0,0,0)'
-    )
 
-    mlflow.log_figure(fig, f"ground_truth.html")
-
-    return {
-    }
 
 def training(instructor, model_input, ground_truth, steps, report_figure_every_n_steps):
     model = instructor.train(model_input, ground_truth, steps, report_figure_every_n_steps)
