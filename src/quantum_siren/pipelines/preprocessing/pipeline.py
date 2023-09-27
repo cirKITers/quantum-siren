@@ -55,6 +55,6 @@ def create_pipeline(**kwargs) -> Pipeline:
             nd_construct_dataloader,
             nd_transform_data,
         ],
-        outputs={"coordinates": "coordinates", "values": "values", "ground_truth_fig":"ground_truth_fig"},
+        outputs={"coordinates": "coordinates", "values": "values"},
         namespace="preprocessing",
     )
