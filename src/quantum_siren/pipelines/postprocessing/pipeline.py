@@ -5,9 +5,19 @@ generated using Kedro 0.18.12
 
 from kedro.pipeline import Pipeline, pipeline, node
 
-from .nodes import upscaling, pixelwise_difference, plot_gradients
+from .nodes import upscaling, pixelwise_difference, plot_gradients, calculate_spectrum, predict
 
 def create_pipeline(**kwargs) -> Pipeline:
+    nd_predict = node(
+        predict,
+        inputs={
+            "model":"model",
+            "coordinates":"coordinates",
+        },
+        outputs={
+            "prediction":"prediction"
+        }
+    )
 
     nd_upscaling = node(
         upscaling,
@@ -25,8 +35,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     nd_pixelwise_diff = node(
         pixelwise_difference,
         inputs={
-            "model":"model",
-            "coordinates":"coordinates",
+            "prediction":"prediction",
             "ground_truth":"values"
         },
         outputs={
@@ -36,9 +45,9 @@ def create_pipeline(**kwargs) -> Pipeline:
     nd_plot_gradients = node(
         plot_gradients,
         inputs={
-            "model":"model",
-            "coordinates":"coordinates",
-            "ground_truth":"values"
+            "prediction":"prediction",
+            "ground_truth":"values",
+            "coordinates":"coordinates"
         },
         outputs={
         }
@@ -46,9 +55,18 @@ def create_pipeline(**kwargs) -> Pipeline:
 
     return pipeline(
         [
+            nd_predict,
             nd_upscaling,
             nd_pixelwise_diff,
-            nd_plot_gradients
+            nd_plot_gradients,
+            node(
+                calculate_spectrum,
+                inputs={
+                    "values":"values"
+                },
+                outputs={
+                }
+            )
         ],
         inputs={
             "coordinates":"coordinates",
