@@ -109,39 +109,3 @@ def plot_ground_truth(img):
     return {
     }
 
-def calculate_spectrum(img):
-    sidelength = int(math.sqrt(img.coords.shape[0]))
-
-    spectrum_z = torch.fft.ifftshift(img.pixels.view(sidelength, sidelength))
-    spectrum_z = torch.fft.fft2(spectrum_z)
-    spectrum_z = torch.fft.fftshift(spectrum_z)
-
-    log_spectrum = torch.log(spectrum_z)
-
-    fig = go.Figure(data =
-                    go.Heatmap(z = log_spectrum.abs().numpy(), colorscale='Aggrnyl')
-                )
-    fig.update_layout(
-        yaxis=dict(
-            scaleanchor='x',
-            autorange='reversed'
-        ),
-        plot_bgcolor='rgba(0,0,0,0)'
-    )
-
-    mlflow.log_figure(fig, f"spectrum_abs.html")
-
-    fig = go.Figure(data =
-                    go.Heatmap(z = log_spectrum.angle().numpy(), colorscale='Aggrnyl')
-                )
-    fig.update_layout(
-        yaxis=dict(
-            scaleanchor='x',
-            autorange='reversed'
-        ),
-        plot_bgcolor='rgba(0,0,0,0)'
-    )
-
-    mlflow.log_figure(fig, f"spectrum_phase.html")
-
-    return {}

@@ -202,3 +202,38 @@ def grads2img(grads_x, grads_y, sidelength):
     grads_rgb = colors.hsv_to_rgb(grads_hsv)
 
     return grads_rgb
+
+def calculate_spectrum(values):
+    sidelength = int(math.sqrt(values.shape[0]))
+
+    spectrum = torch.fft.fft2(values.view(sidelength, sidelength))
+    spectrum = torch.fft.fftshift(spectrum)
+
+
+    fig = go.Figure(data =
+                    go.Heatmap(z = torch.log(spectrum.abs()).numpy(), colorscale='gray')
+                )
+    fig.update_layout(
+        yaxis=dict(
+            scaleanchor='x',
+            autorange='reversed'
+        ),
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+
+    mlflow.log_figure(fig, f"spectrum_abs.html")
+
+    fig = go.Figure(data =
+                    go.Heatmap(z = spectrum.angle().numpy(), colorscale='gray')
+                )
+    fig.update_layout(
+        yaxis=dict(
+            scaleanchor='x',
+            autorange='reversed'
+        ),
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+
+    mlflow.log_figure(fig, f"spectrum_phase.html")
+
+    return {}
