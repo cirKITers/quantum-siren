@@ -35,7 +35,7 @@ def upscaling(model, coordinates, factor):
 
     model_output = model(upscaled_coordinates)
 
-    fig = go.Figure(
+    pred_upscaled_fig = go.Figure(
         data=go.Heatmap(
             z=model_output.cpu()
             .view(upscaled_sidelength, upscaled_sidelength)
@@ -45,13 +45,14 @@ def upscaling(model, coordinates, factor):
             zmid=0,
         )
     )
-    fig.update_layout(
+    pred_upscaled_fig.update_layout(
         yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
     )
 
-    mlflow.log_figure(fig, f"{factor}x_upscaled_prediction.html")
+    # mlflow.log_figure(fig, f"{factor}x_upscaled_prediction.html")
 
     return {
+        "pred_upscaled_fig":pred_upscaled_fig,
         "upscaled_image": model_output.detach(),
         "upscaled_coordinates": upscaled_coordinates,
     }
@@ -62,7 +63,7 @@ def pixelwise_difference(prediction, ground_truth):
 
     difference = prediction - ground_truth.view(sidelength**2)
 
-    fig = go.Figure(
+    pixelwise_diff_fig = go.Figure(
         data=go.Heatmap(
             z=difference.cpu().view(sidelength, sidelength).detach().numpy(),
             colorscale="RdBu",
@@ -70,13 +71,15 @@ def pixelwise_difference(prediction, ground_truth):
         )
     )
 
-    fig.update_layout(
+    pixelwise_diff_fig.update_layout(
         yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
     )
 
-    mlflow.log_figure(fig, f"pixelwise_differences.html")
+    # mlflow.log_figure(fig, f"pixelwise_differences.html")
 
-    return {}
+    return {
+        "pixelwise_diff_fig": pixelwise_diff_fig
+    }
 
 
 def plot_gradients(model, ground_truth, coordinates):
@@ -103,7 +106,7 @@ def plot_gradients(model, ground_truth, coordinates):
         sidelength,
     )
 
-    fig = px.imshow(pred_dc_img)
+    pred_gradients_fig = px.imshow(pred_dc_img)
 
     # pred_normed_dc = pred_dc.norm(dim=-1)
 
@@ -119,7 +122,7 @@ def plot_gradients(model, ground_truth, coordinates):
     #     plot_bgcolor='rgba(0,0,0,0)'
     # )
 
-    mlflow.log_figure(fig, f"prediction_gradients.html")
+    # mlflow.log_figure(fig, f"prediction_gradients.html")
 
     # ----------------------------------------------------------------
     # Laplacian Prediction
@@ -143,7 +146,7 @@ def plot_gradients(model, ground_truth, coordinates):
     # calculate the sum so that it acutally becomes the laplace
     pred_laplace_dcdc = pred_dcdc.sum(dim=-1)
 
-    fig = go.Figure(
+    pred_laplacian_fig = go.Figure(
         data=go.Heatmap(
             z=pred_laplace_dcdc.cpu().view(sidelength, sidelength).detach().numpy(),
             colorscale="RdBu",
@@ -151,11 +154,11 @@ def plot_gradients(model, ground_truth, coordinates):
         )
     )
 
-    fig.update_layout(
+    pred_laplacian_fig.update_layout(
         yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
     )
 
-    mlflow.log_figure(fig, f"prediction_laplacian.html")
+    # mlflow.log_figure(fig, f"prediction_laplacian.html")
 
     # ----------------------------------------------------------------
     # Gradient Ground Truth
@@ -167,7 +170,7 @@ def plot_gradients(model, ground_truth, coordinates):
 
     gt_dc_img = grads2img(gt_dcx, gt_dcy, sidelength)
 
-    fig = px.imshow(gt_dc_img)
+    gt_gradients_fig = px.imshow(gt_dc_img)
 
     # gt_dc = torch.stack((gt_dcx, gt_dcy), dim=-1).view(-1, 2)
     # gt_normed_dc = gt_dc.norm(dim=-1)
@@ -184,22 +187,27 @@ def plot_gradients(model, ground_truth, coordinates):
     #     plot_bgcolor='rgba(0,0,0,0)'
     # )
 
-    mlflow.log_figure(fig, f"gradients.html")
+    # mlflow.log_figure(fig, f"gradients.html")
 
     # ----------------------------------------------------------------
     # Laplacian Ground Truth
 
     gt_laplace_dcdc = scipy.ndimage.laplace(gt_image)
 
-    fig = go.Figure(data=go.Heatmap(z=gt_laplace_dcdc, colorscale="RdBu", zmid=0))
+    gt_laplacian_fig = go.Figure(data=go.Heatmap(z=gt_laplace_dcdc, colorscale="RdBu", zmid=0))
 
-    fig.update_layout(
+    gt_laplacian_fig.update_layout(
         yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
     )
 
-    mlflow.log_figure(fig, f"laplacian.html")
+    # mlflow.log_figure(fig, f"laplacian.html")
 
-    return {}
+    return {
+        "pred_gradients_fig":pred_gradients_fig,
+        "pred_laplacian_fig":pred_laplacian_fig,
+        "gt_gradients_fig":gt_gradients_fig,
+        "gt_laplacian_fig":gt_laplacian_fig,
+    }
 
 
 def grads2img(grads_x, grads_y, sidelength):
@@ -234,20 +242,23 @@ def calculate_spectrum(values):
     spectrum = torch.fft.fft2(values.view(sidelength, sidelength))
     spectrum = torch.fft.fftshift(spectrum)
 
-    fig = go.Figure(
+    spectrum_abs_fig = go.Figure(
         data=go.Heatmap(z=torch.log(spectrum.abs()).numpy(), colorscale="gray")
     )
-    fig.update_layout(
+    spectrum_abs_fig.update_layout(
         yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
     )
 
-    mlflow.log_figure(fig, f"spectrum_abs.html")
+    # mlflow.log_figure(fig, f"spectrum_abs.html")
 
-    fig = go.Figure(data=go.Heatmap(z=spectrum.angle().numpy(), colorscale="gray"))
-    fig.update_layout(
+    spectrum_phase_fig = go.Figure(data=go.Heatmap(z=spectrum.angle().numpy(), colorscale="gray"))
+    spectrum_phase_fig.update_layout(
         yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
     )
 
-    mlflow.log_figure(fig, f"spectrum_phase.html")
+    # mlflow.log_figure(fig, f"spectrum_phase.html")
 
-    return {}
+    return {
+        "spectrum_abs_fig":spectrum_abs_fig,
+        "spectrum_phase_fig":spectrum_phase_fig,
+    }

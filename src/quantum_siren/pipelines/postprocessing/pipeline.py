@@ -32,6 +32,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             "factor": "params:upscale_factor",
         },
         outputs={
+            "pred_upscaled_fig": "pred_upscaled_fig",
             "upscaled_image": "upscaled_image",
             "upscaled_coordinates": "upscaled_coordinates",
         },
@@ -40,7 +41,9 @@ def create_pipeline(**kwargs) -> Pipeline:
     nd_pixelwise_diff = node(
         pixelwise_difference,
         inputs={"prediction": "prediction", "ground_truth": "ground_truth"},
-        outputs={},
+        outputs={
+            "pixelwise_diff_fig":"pixelwise_diff_fig"
+        },
     )
 
     nd_plot_gradients = node(
@@ -50,7 +53,12 @@ def create_pipeline(**kwargs) -> Pipeline:
             "ground_truth": "ground_truth",
             "coordinates": "coordinates",
         },
-        outputs={},
+        outputs={
+            "pred_gradients_fig":"pred_gradients_fig",
+            "pred_laplacian_fig":"pred_laplacian_fig",
+            "gt_gradients_fig":"gt_gradients_fig",
+            "gt_laplacian_fig":"gt_laplacian_fig",
+        },
     )
 
     return pipeline(
@@ -59,7 +67,8 @@ def create_pipeline(**kwargs) -> Pipeline:
             nd_upscaling,
             nd_pixelwise_diff,
             nd_plot_gradients,
-            node(calculate_spectrum, inputs={"values": "ground_truth"}, outputs={}),
+            node(calculate_spectrum, inputs={"values": "ground_truth"}, outputs={"spectrum_abs_fig":"gt_spectrum_abs_fig", "spectrum_phase_fig":"gt_spectrum_phase_fig"}),
+            node(calculate_spectrum, inputs={"values": "prediction"}, outputs={"spectrum_abs_fig":"pred_spectrum_abs_fig", "spectrum_phase_fig":"pred_spectrum_phase_fig"}),
         ],
         inputs={
             "coordinates": "coordinates",

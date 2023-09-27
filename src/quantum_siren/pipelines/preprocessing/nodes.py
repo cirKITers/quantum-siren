@@ -99,19 +99,21 @@ def transform_data(dataloader, nonlinear_coords, img_val_min, img_val_max):
     return {"coordinates": coordinates, "values": values.view(-1)}
 
 
-def plot_ground_truth(img):
+def gen_ground_truth_fig(img):
     sidelength = int(math.sqrt(img.coords.shape[0]))
-    fig = go.Figure(
+    ground_truth_fig = go.Figure(
         data=go.Heatmap(
             z=img.pixels.view(sidelength, sidelength).detach().numpy(),
             colorscale="RdBu",
             zmid=0,
         )
     )
-    fig.update_layout(
+    ground_truth_fig.update_layout(
         yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
     )
 
-    mlflow.log_figure(fig, f"ground_truth.html")
+    # mlflow.log_figure(fig, f"ground_truth.html")
 
-    return {}
+    return {
+        "ground_truth_fig":ground_truth_fig
+    }

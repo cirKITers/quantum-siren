@@ -8,7 +8,7 @@ from .nodes import (
     generate_image,
     construct_dataloader,
     transform_data,
-    plot_ground_truth,
+    gen_ground_truth_fig,
 )
 
 
@@ -18,12 +18,14 @@ def create_pipeline(**kwargs) -> Pipeline:
         inputs={"sidelength": "params:sidelength"},
         outputs={"img": "img"},
     )
-    nd_plot_ground_truth = node(
-        plot_ground_truth,
+    nd_gen_ground_truth_fig = node(
+        gen_ground_truth_fig,
         inputs={
             "img": "img",
         },
-        outputs={},
+        outputs={
+            "ground_truth_fig":"ground_truth_fig"
+        },
     )
     nd_construct_dataloader = node(
         construct_dataloader,
@@ -49,10 +51,10 @@ def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
             nd_generate_img,
-            nd_plot_ground_truth,
+            nd_gen_ground_truth_fig,
             nd_construct_dataloader,
             nd_transform_data,
         ],
-        outputs={"coordinates": "coordinates", "values": "values"},
+        outputs={"coordinates": "coordinates", "values": "values", "ground_truth_fig":"ground_truth_fig"},
         namespace="preprocessing",
     )
