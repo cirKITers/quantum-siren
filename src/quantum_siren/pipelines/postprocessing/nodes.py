@@ -14,11 +14,10 @@ import matplotlib.colors as colors
 import plotly.express as px
 
 def predict(model, coordinates):
-    coordinates.requires_grad = True
     model_output = model(coordinates)
 
     return {
-        "prediction":model_output.view(-1)
+        "prediction":model_output.view(-1).detach()
     }
 
 def upscaling(model, coordinates, factor):
@@ -48,7 +47,7 @@ def upscaling(model, coordinates, factor):
     mlflow.log_figure(fig, f"{factor}x_upscaled_prediction.html")
 
     return {
-        "upscaled_image":model_output,
+        "upscaled_image":model_output.detach(),
         "upscaled_coordinates":upscaled_coordinates
     }
 
@@ -74,8 +73,11 @@ def pixelwise_difference(prediction, ground_truth):
     return {
     }
 
-def plot_gradients(prediction, ground_truth, coordinates):
+def plot_gradients(model, ground_truth, coordinates):
     sidelength = int(math.sqrt(coordinates.shape[0]))
+
+    coordinates.requires_grad = True
+    prediction = model(coordinates)
 
     #----------------------------------------------------------------    
     # Gradient Prediction
