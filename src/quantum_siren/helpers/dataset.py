@@ -17,6 +17,11 @@ from quantum_siren.pipelines.training.models import Model
 import mlflow
 
 class MlFlowPlotlyArtifact(AbstractDataSet):
+    """
+    This class provides a central point for reporting figures via MlFlow instead of writing them via Kedro.
+    Idea is, that kedro still handles the figure data and reporting takes form of individual catalog entries.
+    This way the kedro "spirit" is preserved while using MlFlow for experiment tracking
+    """
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
