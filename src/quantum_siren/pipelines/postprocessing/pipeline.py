@@ -36,7 +36,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         pixelwise_difference,
         inputs={
             "prediction":"prediction",
-            "ground_truth":"values"
+            "ground_truth":"ground_truth"
         },
         outputs={
         }
@@ -45,8 +45,8 @@ def create_pipeline(**kwargs) -> Pipeline:
     nd_plot_gradients = node(
         plot_gradients,
         inputs={
-            "prediction":"prediction",
-            "ground_truth":"values",
+            "model":"model",
+            "ground_truth":"ground_truth",
             "coordinates":"coordinates"
         },
         outputs={
@@ -62,7 +62,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             node(
                 calculate_spectrum,
                 inputs={
-                    "values":"values"
+                    "values":"ground_truth"
                 },
                 outputs={
                 }
@@ -71,7 +71,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         inputs={
             "coordinates":"coordinates",
             "model":"model",
-            "values":"values"
+            "ground_truth":"values"
         },
         outputs={
             "upscaled_image":"upscaled_image"
