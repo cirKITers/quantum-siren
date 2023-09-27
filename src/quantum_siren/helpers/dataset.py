@@ -40,7 +40,7 @@ class TorchLocalModel(AbstractDataSet):
         if model in models:
             self._Model = Model
         else:
-            raise KeyError("Add model to models.")
+            raise KeyError("Add {model} to {models}.")
         default_save_args = {}
         default_load_args = {}
 
