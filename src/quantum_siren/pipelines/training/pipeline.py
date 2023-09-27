@@ -26,6 +26,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             "learning_rate": "params:learning_rate",
             "shots": "params:shots",
             "report_figure_every_n_steps": "params:report_figure_every_n_steps",
+            "optimizer": "params:optimizer",
             # "instructor": "instructor",
             "model_input": "coordinates",
             "ground_truth": "values",

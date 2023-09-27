@@ -1,6 +1,9 @@
 import torch
 import pennylane as qml
 
+class Adam(torch.optim.Adam):
+    def __init__(self, *args, **kwargs):
+        super(Adam, self).__init__(*args, **kwargs)
 
 class QNG(qml.QNGOptimizer, torch.optim.Optimizer):
     """Implementation of the Quantum Natural Gradient Optimizer
@@ -13,7 +16,7 @@ class QNG(qml.QNGOptimizer, torch.optim.Optimizer):
     """
 
     def __init__(
-        self, params, qnode, argnum, lr=0.01, dampening=0, approx="block-diag"
+        self, params, qnode, argnum=None, lr=0.01, dampening=0, approx="block-diag"
     ):
         # Initialize a default dictionary, we utilize this to store any optimizer related hyperparameters
         # Note that this just follows the torch optimizer approach and is not mandatory

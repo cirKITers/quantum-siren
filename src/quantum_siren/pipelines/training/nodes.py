@@ -13,7 +13,12 @@ import mlflow
 import logging
 
 from .models import Model
-from .optimizer import QNG
+from .optimizer import QNG, Adam
+
+optimizers = {
+    "QNG":QNG,
+    "Adam":Adam,
+}
 
 class Instructor:
     def __init__(
@@ -26,13 +31,20 @@ class Instructor:
         learning_rate,
         shots,
         report_figure_every_n_steps,
+        optimizer,
     ) -> None:
         self.steps_till_summary = report_figure_every_n_steps
 
         self.model = Model(
             n_qubits, shots, vqc_ansatz, iec_ansatz, n_layers, data_reupload
         )
-        self.optim = QNG(params=self.model.parameters(), lr=learning_rate, qnode=self.model.qnode, argnum=None)
+
+        if optimizer == "QNG":
+            self.optim = QNG(params=self.model.parameters(), lr=learning_rate, qnode=self.model.qnode, argnum=None)
+        elif optimizer == "Adam":
+            self.optim = Adam(params=self.model.parameters(), lr=learning_rate)
+        else:
+            raise KeyError(f"No optimizer {optimizer} in {optimizers}")
         # self.optim = torch.optim.Adam(lr=learning_rate, params=self.model.parameters())
         pass
 
@@ -147,6 +159,7 @@ def training(
     learning_rate,
     shots,
     report_figure_every_n_steps,
+    optimizer,
     model_input, ground_truth, steps):
     instructor = Instructor(
         n_layers,
@@ -157,8 +170,9 @@ def training(
         learning_rate,
         shots,
         report_figure_every_n_steps,
+        optimizer,
     )
-    
+
     model = instructor.train(model_input, ground_truth, steps)
 
     logging.info("Logging Model to MlFlow")
