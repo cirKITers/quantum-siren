@@ -19,8 +19,8 @@ def upscaling(model, coordinates, factor):
 
     upscaled_coordinates = torch.zeros(size=(upscaled_sidelength**2, 2))
     it = 0
-    for x in torch.linspace(0, coordinates.max(), upscaled_sidelength):
-        for y in torch.linspace(0, coordinates.max(), upscaled_sidelength):
+    for x in torch.linspace(coordinates.min(), coordinates.max(), upscaled_sidelength):
+        for y in torch.linspace(coordinates.min(), coordinates.max(), upscaled_sidelength):
             upscaled_coordinates[it] = torch.tensor([x, y])
             it += 1
 
