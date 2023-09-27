@@ -5,15 +5,18 @@ from PIL import Image
 from torchvision.transforms import Resize, Compose, ToTensor, Normalize
 import skimage
 
+
 def laplace(y, x):
     grad = gradient(y, x)
     return divergence(grad, x)
 
 
 def divergence(y, x):
-    div = 0.
+    div = 0.0
     for i in range(y.shape[-1]):
-        div += torch.autograd.grad(y[..., i], x, torch.ones_like(y[..., i]), create_graph=True)[0][..., i:i+1]
+        div += torch.autograd.grad(
+            y[..., i], x, torch.ones_like(y[..., i]), create_graph=True
+        )[0][..., i : i + 1]
     return div
 
 
@@ -23,20 +26,24 @@ def gradient(y, x, grad_outputs=None):
     grad = torch.autograd.grad(y, [x], grad_outputs=grad_outputs, create_graph=True)[0]
     return grad
 
+
 def get_cameraman_tensor(sidelength):
     img = Image.fromarray(skimage.data.camera())
-    transform = Compose([
-        Resize(sidelength),
-        ToTensor(),
-        Normalize(torch.Tensor([0.5]), torch.Tensor([0.5]))
-    ])
+    transform = Compose(
+        [
+            Resize(sidelength),
+            ToTensor(),
+            Normalize(torch.Tensor([0.5]), torch.Tensor([0.5])),
+        ]
+    )
     img = transform(img)
     return img
 
+
 def get_mgrid(sidelen, dim=2):
-    '''Generates a flattened grid of (x,y,...) coordinates in a range of -1 to 1.
+    """Generates a flattened grid of (x,y,...) coordinates in a range of -1 to 1.
     sidelen: int
-    dim: int'''
+    dim: int"""
     tensors = tuple(dim * [torch.linspace(-1, 1, steps=sidelen)])
     mgrid = torch.stack(torch.meshgrid(*tensors), dim=-1)
     mgrid = mgrid.reshape(-1, dim)
@@ -54,6 +61,7 @@ class ImageFitting(Dataset):
         return 1
 
     def __getitem__(self, idx):
-        if idx > 0: raise IndexError
+        if idx > 0:
+            raise IndexError
 
         return self.coords, self.pixels

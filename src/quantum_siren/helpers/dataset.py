@@ -13,6 +13,7 @@ import torch
 from kedro.io import AbstractDataSet
 
 from quantum_siren.pipelines.training.models import Model
+
 models = {
     "model": Model,
 }
