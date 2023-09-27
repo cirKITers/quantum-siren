@@ -15,10 +15,10 @@ from .models import Model
 
 
 class Instructor():
-    def __init__(self, n_layers, n_qubits, vqc_ansatz, iec_ansatz, data_reupload, learning_rate, shots) -> None:
+    def __init__(self, n_layers, n_qubits, vqc_ansatz, iec_ansatz, data_reupload, learning_rate, shots, report_figure_every_n_steps) -> None:
 
 
-        self.steps_till_summary = 10
+        self.steps_till_summary = report_figure_every_n_steps
         
         self.model = Model(n_qubits, shots, vqc_ansatz, iec_ansatz, n_layers, data_reupload)
         self.optim = torch.optim.Adam(lr=learning_rate, params=self.model.parameters())
@@ -48,13 +48,12 @@ class Instructor():
 
         return val
 
-    def train(self, model_input, ground_truth, steps, report_figure_every_n_steps):
-        sidelength = int(math.sqrt(ground_truth.shape[1]))
+    def train(self, model_input, ground_truth, steps):
+        sidelength = int(math.sqrt(ground_truth.shape[0]))
 
         for step in range(steps):
 
             model_output = self.cost(model_input)
-            model_output = model_output.reshape((1, -1, 1))
 
             loss_val = self.mse(model_output, ground_truth)
             ssim_val = self.ssim(model_output, ground_truth)
@@ -95,8 +94,8 @@ class Instructor():
         return self.model
 
 
-def generate_instructor(n_layers, n_qubits, vqc_ansatz, iec_ansatz, data_reupload, learning_rate, shots):
-    instructor = Instructor(n_layers, n_qubits, vqc_ansatz, iec_ansatz, data_reupload, learning_rate, shots)
+def generate_instructor(n_layers, n_qubits, vqc_ansatz, iec_ansatz, data_reupload, learning_rate, shots, report_figure_every_n_steps):
+    instructor = Instructor(n_layers, n_qubits, vqc_ansatz, iec_ansatz, data_reupload, learning_rate, shots, report_figure_every_n_steps)
 
     return {
         "instructor": instructor
@@ -104,8 +103,8 @@ def generate_instructor(n_layers, n_qubits, vqc_ansatz, iec_ansatz, data_reuploa
 
 
 
-def training(instructor, model_input, ground_truth, steps, report_figure_every_n_steps):
-    model = instructor.train(model_input, ground_truth, steps, report_figure_every_n_steps)
+def training(instructor, model_input, ground_truth, steps):
+    model = instructor.train(model_input, ground_truth, steps)
 
     logging.info("Logging Model to MlFlow")
     mlflow.pyfunc.log_model(python_model=model, artifact_path="qameraman", input_example=model_input.numpy()[0])

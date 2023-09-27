@@ -17,6 +17,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             "data_reupload":"params:data_reupload",
             "learning_rate":"params:learning_rate",
             "shots":"params:shots",
+            "report_figure_every_n_steps":"params:report_figure_every_n_steps"
         },
         outputs={
             "instructor":"instructor"
@@ -30,7 +31,6 @@ def create_pipeline(**kwargs) -> Pipeline:
             "model_input":"coordinates",    
             "ground_truth":"values",
             "steps":"params:steps",
-            "report_figure_every_n_steps":"params:report_figure_every_n_steps"
         },
         outputs={
             "model":"model"
