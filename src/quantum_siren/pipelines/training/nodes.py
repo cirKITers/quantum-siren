@@ -11,8 +11,9 @@ import plotly.graph_objects as go
 
 import mlflow
 import logging
-from .models import Model
 
+from .models import Model
+from .optimizer import QNG
 
 class Instructor:
     def __init__(
@@ -31,7 +32,9 @@ class Instructor:
         self.model = Model(
             n_qubits, shots, vqc_ansatz, iec_ansatz, n_layers, data_reupload
         )
-        self.optim = torch.optim.Adam(lr=learning_rate, params=self.model.parameters())
+        self.optim = QNG(params=self.model.parameters(), lr=learning_rate, qnode=self.model.qnode, argnum=None)
+        # self.optim = torch.optim.Adam(lr=learning_rate, params=self.model.parameters())
+        pass
 
     def cost(self, model_input):
         return self.model(model_input)
@@ -135,7 +138,27 @@ def generate_instructor(
     return {"instructor": instructor}
 
 
-def training(instructor, model_input, ground_truth, steps):
+def training(
+    n_layers,
+    n_qubits,
+    vqc_ansatz,
+    iec_ansatz,
+    data_reupload,
+    learning_rate,
+    shots,
+    report_figure_every_n_steps,
+    model_input, ground_truth, steps):
+    instructor = Instructor(
+        n_layers,
+        n_qubits,
+        vqc_ansatz,
+        iec_ansatz,
+        data_reupload,
+        learning_rate,
+        shots,
+        report_figure_every_n_steps,
+    )
+    
     model = instructor.train(model_input, ground_truth, steps)
 
     logging.info("Logging Model to MlFlow")

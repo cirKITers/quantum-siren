@@ -25,8 +25,9 @@ class Model(mlflow.pyfunc.PythonModel, torch.nn.Module):
 
         dev = qml.device("default.qubit", wires=self.n_qubits, shots=self.shots)
 
+        self.qnode = qml.QNode(self.circuit, dev, interface="torch")
         self.qlayer = qml.qnn.TorchLayer(
-            qml.QNode(self.circuit, dev, interface="torch"),
+            self.qnode,
             {"weights": [n_layers, n_qubits, self.vqc(None)]},
         )
 
@@ -41,7 +42,12 @@ class Model(mlflow.pyfunc.PythonModel, torch.nn.Module):
             torch.rand(size=(n_layers, n_qubits, n_gates_per_layer), requires_grad=True)
         )
 
-    def circuit(self, inputs, weights):
+    def circuit(self, weights, inputs=None):
+        if inputs is None:
+            inputs = self._inputs
+        else:
+            self._inputs = inputs
+            
         dru = torch.zeros(len(weights))
         dru[:: int(1 / self.data_reupload)] = 1
 

@@ -8,8 +8,15 @@ from .nodes import training, generate_instructor
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    nd_generate_instructor = node(
-        generate_instructor,
+    # nd_generate_instructor = node(
+    #     generate_instructor,
+    #     inputs={
+    #     },
+    #     outputs={"instructor": "instructor"},
+    # )
+
+    nd_training = node(
+        training,
         inputs={
             "n_layers": "params:n_layers",
             "n_qubits": "params:n_qubits",
@@ -19,14 +26,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             "learning_rate": "params:learning_rate",
             "shots": "params:shots",
             "report_figure_every_n_steps": "params:report_figure_every_n_steps",
-        },
-        outputs={"instructor": "instructor"},
-    )
-
-    nd_training = node(
-        training,
-        inputs={
-            "instructor": "instructor",
+            # "instructor": "instructor",
             "model_input": "coordinates",
             "ground_truth": "values",
             "steps": "params:steps",
@@ -34,7 +34,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         outputs={"model": "model"},
     )
     return pipeline(
-        [nd_generate_instructor, nd_training],
+        [nd_training],
         inputs={"coordinates": "coordinates", "values": "values"},
         outputs={"model": "model"},
         namespace="training",
