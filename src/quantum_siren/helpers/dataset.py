@@ -8,7 +8,7 @@ modo:
   model: ExampleModel
 """
 from os.path import isfile
-from typing import Any, Union, Dict
+from typing import Any, Dict
 import torch
 from kedro.io import AbstractDataSet
 
