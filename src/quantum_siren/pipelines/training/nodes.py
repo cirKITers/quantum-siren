@@ -28,18 +28,14 @@ class Instructor():
         return self.model(model_input)
 
     def ssim(self, pred, target):
-        sidelength = int(math.sqrt(target.shape[1]))
-
         ssim = StructuralSimilarityIndexMeasure(data_range=1.0)
-        val = ssim(pred.reshape(1, 1, sidelength, sidelength), target.reshape(1, 1, sidelength, sidelength))
+        val = ssim(pred.reshape(1, 1, self.sidelength, self.sidelength), target.reshape(1, 1, self.sidelength, self.sidelength))
 
         return val
 
     def psnr(self, pred, target):
-        sidelength = int(math.sqrt(target.shape[1]))
-
         psnr = PeakSignalNoiseRatio(data_range=1.0)
-        val = psnr(pred.reshape(1, 1, sidelength, sidelength), target.reshape(1, 1, sidelength, sidelength))
+        val = psnr(pred.reshape(1, 1, self.sidelength, self.sidelength), target.reshape(1, 1, self.sidelength, self.sidelength))
 
         return val
 
@@ -48,8 +44,11 @@ class Instructor():
 
         return val
 
+    def calculate_sidelength(self, img):
+        self.sidelength = int(math.sqrt(img.shape[0]))
+
     def train(self, model_input, ground_truth, steps):
-        sidelength = int(math.sqrt(ground_truth.shape[0]))
+        self.calculate_sidelength(ground_truth)
 
         for step in range(steps):
 
@@ -67,7 +66,7 @@ class Instructor():
                 # print(self.params)
                 # print(f"Step {step}:\t Loss: {loss_val.item()}\t SSIM: {ssim_val}")
                 fig = go.Figure(data =
-                    go.Heatmap(z = model_output.cpu().view(sidelength, sidelength).detach().numpy(), colorscale='RdBu', zmid=0)
+                    go.Heatmap(z = model_output.cpu().view(self.sidelength, self.sidelength).detach().numpy(), colorscale='RdBu', zmid=0)
                 )
                 fig.update_layout(
                     yaxis=dict(
