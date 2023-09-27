@@ -13,6 +13,14 @@ import numpy as np
 import matplotlib.colors as colors
 import plotly.express as px
 
+def predict(model, coordinates):
+    coordinates.requires_grad = True
+    model_output = model(coordinates)
+
+    return {
+        "prediction":model_output.view(-1)
+    }
+
 def upscaling(model, coordinates, factor):
     sidelength = math.sqrt(coordinates.shape[0])
     upscaled_sidelength = int(sidelength*factor)
@@ -40,16 +48,14 @@ def upscaling(model, coordinates, factor):
     mlflow.log_figure(fig, f"{factor}x_upscaled_prediction.html")
 
     return {
-        "upscaled_image":model_output.detach().numpy(),
+        "upscaled_image":model_output,
         "upscaled_coordinates":upscaled_coordinates
     }
 
-def pixelwise_difference(model, coordinates, ground_truth):
-    sidelength = int(math.sqrt(coordinates.shape[0]))
+def pixelwise_difference(prediction, ground_truth):
+    sidelength = int(math.sqrt(prediction.shape[0]))
 
-    model_output = model(coordinates)
-
-    difference = model_output - ground_truth.view(sidelength**2)
+    difference = prediction - ground_truth.view(sidelength**2)
 
     fig = go.Figure(data =
                     go.Heatmap(z = difference.cpu().view(sidelength, sidelength).detach().numpy(), colorscale='RdBu', zmid=0)
@@ -68,16 +74,13 @@ def pixelwise_difference(model, coordinates, ground_truth):
     return {
     }
 
-def plot_gradients(model, coordinates, ground_truth):
+def plot_gradients(prediction, ground_truth, coordinates):
     sidelength = int(math.sqrt(coordinates.shape[0]))
-
-    coordinates.requires_grad = True
-    model_output = model(coordinates)
 
     #----------------------------------------------------------------    
     # Gradient Prediction
 
-    pred_dc = torch.autograd.grad(outputs=model_output.sum(), inputs=coordinates, grad_outputs=None, create_graph=True)[0] #same shape as coordinates
+    pred_dc = torch.autograd.grad(outputs=prediction.sum(), inputs=coordinates, grad_outputs=None, create_graph=True)[0] #same shape as coordinates
 
     pred_dc_img = grads2img(pred_dc[..., 0].view(sidelength, sidelength), pred_dc[..., 1].view(sidelength, sidelength), sidelength)
 
