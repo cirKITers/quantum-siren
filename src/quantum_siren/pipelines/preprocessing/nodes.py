@@ -88,7 +88,7 @@ def transform_data(dataloader, nonlinear_coords, img_val_min, img_val_max):
 
     return {
         "coordinates": coordinates,
-        "values": values
+        "values": values.view(-1)
     }
 
 def plot_ground_truth(img):
