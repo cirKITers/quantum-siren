@@ -21,6 +21,8 @@ optimizers = {
 }
 
 class Instructor:
+    
+
     def __init__(
         self,
         n_layers,
@@ -32,6 +34,7 @@ class Instructor:
         shots,
         report_figure_every_n_steps,
         optimizer,
+        loss,
     ) -> None:
         self.steps_till_summary = report_figure_every_n_steps
 
@@ -47,6 +50,34 @@ class Instructor:
             raise KeyError(f"No optimizer {optimizer} in {optimizers}")
         # self.optim = torch.optim.Adam(lr=learning_rate, params=self.model.parameters())
         pass
+
+        self.metrics = {
+            "mse":self.mse,
+            "ssim":self.ssim,
+            "fft_ssim":self.fft_ssim,
+            "psnr":self.psnr,
+        }
+
+        if loss == "fft_ssim":
+            self.loss = self.fft_ssim
+            self.sign = -1
+        elif loss == "mse":
+            self.loss = self.mse
+            self.sign = 1
+        elif loss == "psnr":
+            self.loss = self.psnr
+            self.sign = -1
+        elif loss == "ssim":
+            self.loss = self.mse
+            self.sign = -1
+        else:
+            raise KeyError(f"No optimizer {loss} in {self.metrics}")
+
+        del self.metrics[loss]
+
+        
+    def cost(self, *args):
+        return self.loss(*args) * self.loss_sign
 
 
     def fft_ssim(self, pred, target):
@@ -91,15 +122,14 @@ class Instructor:
         self.calculate_sidelength(ground_truth)
 
         for step in range(steps):
-            model_output = self.cost(model_input)
+            model_output = self.model(model_input)
 
-            loss_val = self.mse(model_output, ground_truth)
-            ssim_val = self.ssim(model_output, ground_truth)
-            psnr_val = self.psnr(model_output, ground_truth)
-
+            loss_val = self.loss(model_output, ground_truth)
             mlflow.log_metric("Loss", loss_val.item(), step)
-            mlflow.log_metric("SSIM", ssim_val, step)
-            mlflow.log_metric("PSNR", psnr_val, step)
+
+            for name, metric in self.metrics.items():
+                val = metric(model_output, ground_truth)
+                mlflow.log_metric(name, val, step)
 
             if not step % self.steps_till_summary:
                 # print(self.params)
@@ -170,6 +200,7 @@ def training(
     shots,
     report_figure_every_n_steps,
     optimizer,
+    loss,
     model_input, ground_truth, steps):
     instructor = Instructor(
         n_layers,
@@ -181,6 +212,7 @@ def training(
         shots,
         report_figure_every_n_steps,
         optimizer,
+        loss,
     )
 
     model = instructor.train(model_input, ground_truth, steps)
