@@ -30,7 +30,7 @@ class ansaetze:
             qml.RY(q_params[1], wires=2 * q + 1)
 
     @staticmethod
-    def spread_layers_limit(params, limit, **kwargs):
+    def spread_layers_limit(params, limit=2, **kwargs):
         for q, q_params in enumerate(params):
             if 2 * q >= limit:
                 break
