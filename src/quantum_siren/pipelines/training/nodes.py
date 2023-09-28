@@ -48,8 +48,18 @@ class Instructor:
         # self.optim = torch.optim.Adam(lr=learning_rate, params=self.model.parameters())
         pass
 
-    def cost(self, model_input):
-        return self.model(model_input)
+
+    def fft_ssim(self, pred, target):
+        pred_spectrum = torch.fft.fft2(pred.view(self.sidelength, self.sidelength))
+        pred_spectrum = torch.fft.fftshift(pred_spectrum)
+
+        target_spectrum = torch.fft.fft2(target.view(self.sidelength, self.sidelength))
+        target_spectrum = torch.fft.fftshift(target_spectrum)
+
+        val_abs = self.ssim(torch.log(pred_spectrum.abs()), torch.log(target_spectrum.abs()))
+        val_phase = self.ssim(torch.log(pred_spectrum.angle()), torch.log(target_spectrum.abs()))
+
+        return val_abs + val_phase
 
     def ssim(self, pred, target):
         ssim = StructuralSimilarityIndexMeasure(data_range=1.0)
