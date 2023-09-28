@@ -73,7 +73,7 @@ class Instructor:
         else:
             raise KeyError(f"No optimizer {loss} in {self.metrics}")
 
-        del self.metrics[loss]
+        # del self.metrics[loss]
 
         
     def cost(self, *args):
@@ -88,7 +88,7 @@ class Instructor:
         target_spectrum = torch.fft.fftshift(target_spectrum)
 
         val_abs = self.ssim(torch.log(pred_spectrum.abs()), torch.log(target_spectrum.abs()))
-        val_phase = self.ssim(torch.log(pred_spectrum.angle()), torch.log(target_spectrum.abs()))
+        val_phase = self.ssim(pred_spectrum.angle(), target_spectrum.angle())
 
         return val_abs + val_phase
 
@@ -125,7 +125,7 @@ class Instructor:
             model_output = self.model(model_input)
 
             loss_val = self.loss(model_output, ground_truth)
-            mlflow.log_metric("Loss", loss_val.item(), step)
+            # mlflow.log_metric("Loss", loss_val.item(), step)
 
             for name, metric in self.metrics.items():
                 val = metric(model_output, ground_truth)
