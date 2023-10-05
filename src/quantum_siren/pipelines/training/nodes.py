@@ -92,7 +92,7 @@ class Instructor:
         val_abs = self.ssim(torch.log(pred_spectrum.abs()), torch.log(target_spectrum.abs()))
         val_phase = self.ssim(pred_spectrum.angle(), target_spectrum.angle())
 
-        return val_abs + val_phase
+        return (val_abs + val_phase)/2 # because we want to match phase and amplitude but keep the result <=1
 
     def ssim(self, pred, target):
         ssim = StructuralSimilarityIndexMeasure(data_range=1.0)
