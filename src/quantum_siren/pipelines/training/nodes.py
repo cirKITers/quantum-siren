@@ -58,18 +58,20 @@ class Instructor:
             "psnr":self.psnr,
         }
 
+        # set the sign for the loss depending on the metric type
+        # a "-1" means "maximize this metric" and a "1" means "minimize"
         if loss == "fft_ssim":
             self.loss = self.fft_ssim
-            self.sign = -1
+            self.loss_sign = -1
         elif loss == "mse":
             self.loss = self.mse
-            self.sign = 1
+            self.loss_sign = 1
         elif loss == "psnr":
             self.loss = self.psnr
-            self.sign = -1
+            self.loss_sign = -1
         elif loss == "ssim":
-            self.loss = self.mse
-            self.sign = -1
+            self.loss = self.ssim
+            self.loss_sign = -1
         else:
             raise KeyError(f"No optimizer {loss} in {self.metrics}")
 
@@ -124,7 +126,7 @@ class Instructor:
         for step in range(steps):
             model_output = self.model(model_input)
 
-            loss_val = self.loss(model_output, ground_truth)
+            loss_val = self.cost(model_output, ground_truth)
             # mlflow.log_metric("Loss", loss_val.item(), step)
 
             for name, metric in self.metrics.items():
