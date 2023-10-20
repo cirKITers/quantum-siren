@@ -12,7 +12,7 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   data_reupload: ${data_reupload}
   learning_rate: ${learning_rate}
   shots: ${shots}
-  optimizer: "QNG"
+  optimizer: "Adam"
   steps: 300
   report_figure_every_n_steps: 20
-  loss: "psnr"
+  loss: "mse" #mse, fft_ssim, ssim, psnr
