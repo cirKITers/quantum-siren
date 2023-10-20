@@ -73,7 +73,7 @@ class Instructor:
             self.loss = self.ssim
             self.loss_sign = -1
         else:
-            raise KeyError(f"No optimizer {loss} in {self.metrics}")
+            raise KeyError(f"No loss {loss} in {self.metrics}")
 
         # del self.metrics[loss]
 
