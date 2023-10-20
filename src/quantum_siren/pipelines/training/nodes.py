@@ -6,6 +6,7 @@ import torch
 from torchmetrics.image import StructuralSimilarityIndexMeasure, PeakSignalNoiseRatio
 
 import math
+import logging
 
 import plotly.graph_objects as go
 
@@ -16,13 +17,14 @@ from .models import Model
 from .optimizer import QNG, Adam
 
 optimizers = {
-    "QNG":QNG,
-    "Adam":Adam,
+    "QNG": QNG,
+    "Adam": Adam,
 }
 
-class Instructor:
-    
+log = logging.getLogger(__name__)
 
+
+class Instructor:
     def __init__(
         self,
         n_layers,
@@ -43,7 +45,12 @@ class Instructor:
         )
 
         if optimizer == "QNG":
-            self.optim = QNG(params=self.model.parameters(), lr=learning_rate, qnode=self.model.qnode, argnum=None)
+            self.optim = QNG(
+                params=self.model.parameters(),
+                lr=learning_rate,
+                qnode=self.model.qnode,
+                argnum=None,
+            )
         elif optimizer == "Adam":
             self.optim = Adam(params=self.model.parameters(), lr=learning_rate)
         else:
@@ -52,10 +59,10 @@ class Instructor:
         pass
 
         self.metrics = {
-            "mse":self.mse,
-            "ssim":self.ssim,
-            "fft_ssim":self.fft_ssim,
-            "psnr":self.psnr,
+            "mse": self.mse,
+            "ssim": self.ssim,
+            "fft_ssim": self.fft_ssim,
+            "psnr": self.psnr,
         }
 
         # set the sign for the loss depending on the metric type
@@ -77,10 +84,8 @@ class Instructor:
 
         # del self.metrics[loss]
 
-        
     def cost(self, *args):
         return self.loss(*args) * self.loss_sign
-
 
     def fft_ssim(self, pred, target):
         pred_spectrum = torch.fft.fft2(pred.view(self.sidelength, self.sidelength))
@@ -89,10 +94,14 @@ class Instructor:
         target_spectrum = torch.fft.fft2(target.view(self.sidelength, self.sidelength))
         target_spectrum = torch.fft.fftshift(target_spectrum)
 
-        val_abs = self.ssim(torch.log(pred_spectrum.abs()), torch.log(target_spectrum.abs()))
+        val_abs = self.ssim(
+            torch.log(pred_spectrum.abs()), torch.log(target_spectrum.abs())
+        )
         val_phase = self.ssim(pred_spectrum.angle(), target_spectrum.angle())
 
-        return (val_abs + val_phase)/2 # because we want to match phase and amplitude but keep the result <=1
+        return (
+            val_abs + val_phase
+        ) / 2  # because we want to match phase and amplitude but keep the result <=1
 
     def ssim(self, pred, target):
         ssim = StructuralSimilarityIndexMeasure(data_range=1.0)
@@ -160,6 +169,7 @@ class Instructor:
                 # axes[1].imshow(img_grad.norm(dim=-1).cpu().view(sidelength,sidelength).detach().numpy())
                 # axes[2].imshow(img_laplacian.cpu().view(sidelength,sidelength).detach().numpy())
                 # plt.show()
+                log.debug(f"Step {step}:\t Loss: {loss_val.item()}")
 
             self.optim.zero_grad()
             loss_val.backward()
@@ -203,7 +213,10 @@ def training(
     report_figure_every_n_steps,
     optimizer,
     loss,
-    model_input, ground_truth, steps):
+    model_input,
+    ground_truth,
+    steps,
+):
     instructor = Instructor(
         n_layers,
         n_qubits,
