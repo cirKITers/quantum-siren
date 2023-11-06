@@ -37,7 +37,11 @@ class Instructor:
         report_figure_every_n_steps,
         optimizer,
         loss,
+        seed,
     ) -> None:
+        # this sets a global seed, that, according to documentation, affects the weight initialization and dataloader (although this object is already created at that point)
+        torch.manual_seed(seed)
+
         self.steps_till_summary = report_figure_every_n_steps
 
         self.model = Model(
@@ -216,6 +220,7 @@ def training(
     model_input,
     ground_truth,
     steps,
+    seed,
 ):
     instructor = Instructor(
         n_layers,
@@ -228,6 +233,7 @@ def training(
         report_figure_every_n_steps,
         optimizer,
         loss,
+        seed,
     )
 
     model = instructor.train(model_input, ground_truth, steps)
