@@ -1,0 +1,14 @@
+pennylane
+pillow
+scikit-image
+ipykernel
+matplotlib
+kedro
+torchsummary
+torchmetrics
+kedro-mlflow
+plotly
+dask
+black
+--index-url https://download.pytorch.org/whl/cpu
+torchvision
