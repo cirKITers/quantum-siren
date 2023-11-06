@@ -39,7 +39,8 @@ class Instructor:
         loss,
         seed,
     ) -> None:
-        # this sets a global seed, that, according to documentation, affects the weight initialization and dataloader (although this object is already created at that point)
+        # this sets a global seed, that, according to documentation, affects the
+        # weight initialization and dataloader
         torch.manual_seed(seed)
 
         self.steps_till_summary = report_figure_every_n_steps
