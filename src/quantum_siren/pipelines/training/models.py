@@ -7,7 +7,7 @@ from .ansaetze import ansaetze
 import mlflow
 
 
-class Model(mlflow.pyfunc.PythonModel, torch.nn.Module):
+class Model(torch.nn.Module):
     # class Module(torch.nn.Module):
     def __init__(
         self, n_qubits, shots, vqc_ansatz, iec_ansatz, n_layers, data_reupload
@@ -47,7 +47,7 @@ class Model(mlflow.pyfunc.PythonModel, torch.nn.Module):
             inputs = self._inputs
         else:
             self._inputs = inputs
-            
+
         dru = torch.zeros(len(weights))
         dru[:: int(1 / self.data_reupload)] = 1
 

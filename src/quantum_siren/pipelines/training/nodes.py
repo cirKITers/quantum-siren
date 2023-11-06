@@ -240,10 +240,9 @@ def training(
     model = instructor.train(model_input, ground_truth, steps)
 
     logging.info("Logging Model to MlFlow")
-    mlflow.pyfunc.log_model(
-        python_model=model,
+    mlflow.pytorch.log_model(
+        pytorch_model=model,
         artifact_path="qameraman",
-        input_example=model_input.numpy()[0],
     )
 
     return {"model": model}
