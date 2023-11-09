@@ -32,6 +32,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             "model_input": "coordinates",
             "ground_truth": "values",
             "steps": "params:steps",
+            "seed": "params:seed",
         },
         outputs={"model": "model"},
     )

@@ -10,7 +10,6 @@ from PIL import Image
 from torchvision.transforms import Resize, Compose, ToTensor, Normalize
 import skimage
 
-import mlflow
 import math
 
 import plotly.graph_objects as go
@@ -114,6 +113,4 @@ def gen_ground_truth_fig(img):
 
     # mlflow.log_figure(fig, f"ground_truth.html")
 
-    return {
-        "ground_truth_fig":ground_truth_fig
-    }
+    return {"ground_truth_fig": ground_truth_fig}
