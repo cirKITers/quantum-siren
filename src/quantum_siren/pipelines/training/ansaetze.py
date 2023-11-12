@@ -24,6 +24,12 @@ class ansaetze:
             qml.CRX(q_params[2], wires=[q, (q + 1) % params.shape[0]])
 
     @staticmethod
+    def default(params, **kwargs):
+        for q, q_params in enumerate(params):
+            qml.RX(q_params[0], wires=q)
+            qml.RY(q_params[1], wires=q)
+
+    @staticmethod
     def spread_layers(params, **kwargs):
         for q, q_params in enumerate(params):
             qml.RY(q_params[0], wires=2 * q)
