@@ -13,7 +13,7 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   learning_rate: ${learning_rate}
   shots: ${shots}
   optimizer: "Adam"
-  steps: 300
+  output_interpretation: "all" # all, [qubit_index]
   report_figure_every_n_steps: 20
   loss: "mse" #mse, fft_ssim, ssim, psnr
   seed: 1111
