@@ -31,6 +31,12 @@ class ansaetze:
                 ],
             )
 
+    @staticmethod
+    def circuit_18(params):
+        """
+        Generates a single layer of circuit_19
+        See https://arxiv.org/pdf/1905.10876.pdf
+
         Args:
             params (torch.tensor|np.ndarray): Parameters that are being utilized in the layer. Expects form to be [n_qubits, n_gates_per_layer], where n_gates_per_layer=3 in this case. If None, then the number of required params per layer is returned.
         """
@@ -41,7 +47,14 @@ class ansaetze:
             qml.RX(q_params[0], wires=q)
             qml.RZ(q_params[1], wires=q)
 
-            qml.CRX(q_params[2], wires=[q, (q + 1) % params.shape[0]])
+        for q, q_params in enumerate(params):
+            qml.CRZ(
+                q_params[2],
+                wires=[
+                    params.shape[0] - q - 1,
+                    (params.shape[0] - q) % params.shape[0],
+                ],
+            )
 
     @staticmethod
     def default(params, **kwargs):
