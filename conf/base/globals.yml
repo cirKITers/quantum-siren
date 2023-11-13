@@ -5,3 +5,4 @@ iec_ansatz: "spread_layers"
 data_reupload: 1.0
 learning_rate: 0.05
 shots: "None"
+output_interpretation: "all" # all, [qubit_index]

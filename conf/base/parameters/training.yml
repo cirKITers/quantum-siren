@@ -16,4 +16,5 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   output_interpretation: "all" # all, [qubit_index]
   report_figure_every_n_steps: 20
   loss: "mse" #mse, fft_ssim, ssim, psnr
+  output_interpretation: ${output_interpretation}
   seed: 1111
