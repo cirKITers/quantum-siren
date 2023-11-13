@@ -65,8 +65,7 @@ class Model(torch.nn.Module):
         for l, l_params in enumerate(weights):
             if l == 0 or dru[l] == 1:
                 self.iec(
-                    torch.stack([inputs] * (self.n_qubits // 2)),
-                    limit=self.n_qubits - (l // 2),
+                    torch.stack([inputs] * self.n_qubits),
                 )  # half because the coordinates already have 2 dims
 
             self.vqc(l_params)
