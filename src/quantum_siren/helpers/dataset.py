@@ -64,7 +64,7 @@ class MlFlowPlotlyArtifact(AbstractDataset):
         return isfile(self._filepath)
 
 
-class TorchLocalModel(AbstractDataSet):
+class TorchLocalModel(AbstractDataset):
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
