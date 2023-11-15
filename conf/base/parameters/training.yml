@@ -18,3 +18,4 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   loss: "mse" #mse, fft_ssim, ssim, psnr
   output_interpretation: ${output_interpretation}
   seed: 1111
+  max_workers: "None" # sets the number of workers that the pennylane simulators spawns
