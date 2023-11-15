@@ -27,6 +27,7 @@ class Model(torch.nn.Module):
         log.info(f"Creating Model with {n_qubits} Qubits, {n_layers} Layers.")
 
         self.shots = None if shots == "None" else shots
+        self.max_workers = None if max_workers == "None" else max_workers
         self.n_qubits = n_qubits
         self.n_layers = n_layers
 
@@ -42,7 +43,7 @@ class Model(torch.nn.Module):
             "default.qubit",
             wires=self.n_qubits,
             shots=self.shots,
-            max_workers=max_workers,
+            max_workers=self.max_workers,
         )
 
         self.qnode = qml.QNode(self.circuit, dev, interface="torch")
