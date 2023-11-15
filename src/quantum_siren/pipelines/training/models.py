@@ -4,7 +4,9 @@ import torch
 
 from .ansaetze import ansaetze
 
-import mlflow
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class Model(torch.nn.Module):
@@ -20,6 +22,8 @@ class Model(torch.nn.Module):
         output_interpretation,
     ) -> None:
         super().__init__()
+
+        log.info(f"Creating Model with {n_qubits} Qubits, {n_layers} Layers.")
 
         self.shots = None if shots == "None" else shots
         self.n_qubits = n_qubits
