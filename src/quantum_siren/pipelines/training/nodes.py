@@ -55,6 +55,7 @@ class Instructor:
             n_layers,
             data_reupload,
             output_interpretation,
+            max_workers,
         )
 
         if optimizer == "QNG":
