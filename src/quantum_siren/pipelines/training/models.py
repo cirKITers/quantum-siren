@@ -20,6 +20,7 @@ class Model(torch.nn.Module):
         n_layers,
         data_reupload,
         output_interpretation,
+        max_workers,
     ) -> None:
         super().__init__()
 
@@ -37,7 +38,12 @@ class Model(torch.nn.Module):
 
         self.data_reupload = data_reupload
 
-        dev = qml.device("default.qubit", wires=self.n_qubits, shots=self.shots)
+        dev = qml.device(
+            "default.qubit",
+            wires=self.n_qubits,
+            shots=self.shots,
+            max_workers=max_workers,
+        )
 
         self.qnode = qml.QNode(self.circuit, dev, interface="torch")
         self.qlayer = qml.qnn.TorchLayer(
