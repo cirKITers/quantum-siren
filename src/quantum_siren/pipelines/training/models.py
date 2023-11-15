@@ -34,9 +34,12 @@ class Model(torch.nn.Module):
         self.iec = getattr(ansaetze, iec_ansatz, ansaetze.nothing)
         self.vqc = getattr(ansaetze, vqc_ansatz, ansaetze.nothing)
 
-        assert (
-            output_interpretation == "all" or type(output_interpretation) == int
-        ), f"Output interpretation parameter can either be a qubit (integer) or 'all'"
+        if output_interpretation != "all":
+            output_interpretation = int(output_interpretation)
+            assert (
+                output_interpretation < n_qubits
+            ), f"Output interpretation parameter {output_interpretation} can either be a qubit (integer smaller n_qubits) or 'all'"
+
         self.output_interpretation = output_interpretation
 
         self.data_reupload = data_reupload
