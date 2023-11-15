@@ -22,7 +22,7 @@ This project is built using the [Kedro Framework](https://docs.kedro.org).
 
 **Using pip**:
 ```
-pip install -r src/requirements-cpu.in
+pip install -r src/requirements.in
 ```
 or 
 ```
@@ -32,7 +32,7 @@ if you want to have the GPU package of PyTorch
 
 **Using poetry**:
 ```
-poetry install --extras='cpu'
+poetry install
 ```
 or 
 ```
