@@ -20,7 +20,7 @@ gpu=["torchvision"]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
-pennylane = "^0.31.0"
+pennylane = "^0.33.1"
 pillow = "^10.0.0"
 scikit-image = "^0.21.0"
 ipykernel = "^6.25.0"
