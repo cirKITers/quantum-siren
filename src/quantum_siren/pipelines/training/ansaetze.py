@@ -13,7 +13,9 @@ class ansaetze:
         See https://arxiv.org/pdf/1905.10876.pdf
 
         Args:
-            params (torch.tensor|np.ndarray): Parameters that are being utilized in the layer. Expects form to be [n_qubits, n_gates_per_layer], where n_gates_per_layer=3 in this case. If None, then the number of required params per layer is returned.
+            params (torch.tensor|np.ndarray): Parameters that are being utilized in the layer.
+            Expects form to be [n_qubits, n_gates_per_layer], where n_gates_per_layer=3 in this case.
+            If None, then the number of required params per layer is returned.
         """
         if params is None:
             return 3
@@ -38,7 +40,9 @@ class ansaetze:
         See https://arxiv.org/pdf/1905.10876.pdf
 
         Args:
-            params (torch.tensor|np.ndarray): Parameters that are being utilized in the layer. Expects form to be [n_qubits, n_gates_per_layer], where n_gates_per_layer=3 in this case. If None, then the number of required params per layer is returned.
+            params (torch.tensor|np.ndarray): Parameters that are being utilized in the layer.
+            Expects form to be [n_qubits, n_gates_per_layer], where n_gates_per_layer=3 in this case.
+            If None, then the number of required params per layer is returned.
         """
         if params is None:
             return 3
