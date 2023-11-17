@@ -16,7 +16,8 @@ torchvision = [
     {version = "^0.15.2+cpu", source = "torch_cpu", markers = "extra == 'cpu'"},
     {version = "^0.15.2", source = "torch_gpu", markers = "extra == 'gpu'"}
 ]
-kedro = "^0.18.12"
+torchvision = "^0.16.0"
+kedro = "^0.18.14"
 torchsummary = "^1.5.1"
 torchmetrics = "^1.0.2"
 kedro-mlflow = "^0.11.9"
