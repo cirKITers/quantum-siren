@@ -30,7 +30,7 @@ torch = [
     {version = "2.1.0+cpu", source = "torch_cpu", markers = "extra != 'gpu'"}
 ]
 torchvision = "^0.16.0"
-kedro = "^0.18.12"
+kedro = "^0.18.14"
 torchsummary = "^1.5.1"
 torchmetrics = "^1.0.2"
 kedro-mlflow = "^0.11.9"
