@@ -23,7 +23,7 @@
 #SBATCH --output="logs/slurm/slurm-%j.out"
 
 
-./venv/bin/python -m kedro run --params=$1
+.venv/bin/python -m kedro run --params=$1
 
 # Done
 exit 0
