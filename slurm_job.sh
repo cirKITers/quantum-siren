@@ -11,7 +11,7 @@
 #
 # expected duration of the job
 #              hh:mm:ss
-#SBATCH --time=20:00:00
+#SBATCH --time=10:00:00
 # 
 # partition the job will run on
 #SBATCH --partition single
@@ -22,8 +22,7 @@
 # output path
 #SBATCH --output="logs/slurm/slurm-%j.out"
 
-
-./venv/bin/python -m kedro run --params=$1
+/home/kit/scc/lc3267/quantum-siren/.venv/bin/python -m kedro run --params=$1
 
 # Done
 exit 0
