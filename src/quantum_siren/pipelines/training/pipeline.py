@@ -34,7 +34,8 @@ def create_pipeline(**kwargs) -> Pipeline:
             "ground_truth": "values",
             "steps": "params:steps",
             "seed": "params:seed",
-            "max_workers": "params:max_workers",
+            "max_processes": "params:max_processes",
+            "max_threads": "params:max_threads",
         },
         outputs={"model": "model"},
     )

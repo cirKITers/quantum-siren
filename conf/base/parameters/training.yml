@@ -5,7 +5,7 @@
 # Link: https://docs.kedro.org/en/0.18.12/kedro_project_setup/configuration.html#parameters
 
 training: #see globals.yml for adjustment of n_qubits, n_layers,...
-  n_qubits: 4
+  n_qubits: 10
   n_layers: 22
   vqc_ansatz: "circuit_19"
   iec_ansatz: "spread_layers"
@@ -17,5 +17,6 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   report_figure_every_n_steps: 20
   loss: "mse" #mse, fft_ssim, ssim, psnr
   output_interpretation: "all" # "all" or a specific qubit number
-  max_workers: "None"
+  max_processes: 4
+  max_threads: 4
   seed: 1111

@@ -14,7 +14,8 @@ model:
       n_layers: "${runtime_params:training.n_layers, ${globals:training.n_layers}}"
       data_reupload: "${runtime_params:training.data_reupload, ${globals:training.data_reupload}}"
       output_interpretation: "${runtime_params:training.output_interpretation, ${globals:training.output_interpretation}}"
-      max_workers: "${runtime_params:training.max_workers, ${globals:training.max_workers}}"
+      max_processes: "${runtime_params:training.max_processes, ${globals:training.max_processes}}"
+      max_threads: "${runtime_params:training.max_threads, ${globals:training.max_threads}}"
 
 # Intermediate Data
 

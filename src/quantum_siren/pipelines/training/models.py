@@ -1,6 +1,7 @@
 import pennylane as qml
 
 import torch
+import os
 
 from .ansaetze import ansaetze
 
@@ -20,14 +21,15 @@ class Model(torch.nn.Module):
         n_layers,
         data_reupload,
         output_interpretation,
-        max_workers,
+        max_processes,
+        max_threads,
     ) -> None:
         super().__init__()
 
         log.info(f"Creating Model with {n_qubits} Qubits, {n_layers} Layers.")
 
         self.shots = None if shots == "None" else shots
-        self.max_workers = None if max_workers == "None" else max_workers
+        self.max_processes = None if max_processes == "None" else max_processes
         self.n_qubits = n_qubits
         self.n_layers = n_layers
 
@@ -44,11 +46,13 @@ class Model(torch.nn.Module):
 
         self.data_reupload = data_reupload
 
+        os.environ["OMP_NUM_THREADS"] = f"{max_threads}"
+
         dev = qml.device(
             "default.qubit",
             wires=self.n_qubits,
             shots=self.shots,
-            max_workers=self.max_workers,
+            max_workers=self.max_processes,
         )
 
         self.qnode = qml.QNode(self.circuit, dev, interface="torch")

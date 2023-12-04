@@ -39,7 +39,8 @@ class Instructor:
         output_interpretation,
         loss,
         seed,
-        max_workers,
+        max_processes,
+        max_threads,
     ) -> None:
         # this sets a global seed, that, according to documentation, affects the
         # weight initialization and dataloader
@@ -55,7 +56,8 @@ class Instructor:
             n_layers,
             data_reupload,
             output_interpretation,
-            max_workers,
+            max_processes,
+            max_threads,
         )
 
         if optimizer == "QNG":
@@ -144,6 +146,8 @@ class Instructor:
         self.sidelength = int(math.sqrt(img.shape[0]))
 
     def train(self, model_input, ground_truth, steps):
+        log.info(f"Running {steps} steps of training.")
+
         self.calculate_sidelength(ground_truth)
 
         for step in range(steps):
@@ -151,6 +155,8 @@ class Instructor:
 
             loss_val = self.cost(model_output, ground_truth)
             # mlflow.log_metric("Loss", loss_val.item(), step)
+
+            log.debug(f"Step {step}:\t Loss: {loss_val.item()}")
 
             for name, metric in self.metrics.items():
                 val = metric(model_output, ground_truth)
@@ -232,7 +238,8 @@ def training(
     ground_truth,
     steps,
     seed,
-    max_workers,
+    max_processes,
+    max_threads,
 ):
     instructor = Instructor(
         n_layers,
@@ -247,7 +254,8 @@ def training(
         output_interpretation,
         loss,
         seed,
-        max_workers,
+        max_processes,
+        max_threads,
     )
 
     model = instructor.train(model_input, ground_truth, steps)
