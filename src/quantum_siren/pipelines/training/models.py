@@ -46,14 +46,20 @@ class Model(torch.nn.Module):
 
         self.data_reupload = data_reupload
 
-        os.environ["OMP_NUM_THREADS"] = f"{max_threads}"
-
-        dev = qml.device(
-            "default.qubit",
-            wires=self.n_qubits,
-            shots=self.shots,
-            max_workers=self.max_processes,
-        )
+        if n_qubits <= 6:
+            os.environ["OMP_NUM_THREADS"] = f"{max_threads}"
+            dev = qml.device(
+                "default.qubit",
+                wires=self.n_qubits,
+                shots=self.shots,
+                max_workers=self.max_processes,
+            )
+        else:
+            dev = qml.device(
+                "lightning.qubit",
+                wires=self.n_qubits,
+                shots=self.shots,
+            )
 
         self.qnode = qml.QNode(self.circuit, dev, interface="torch")
         self.qlayer = qml.qnn.TorchLayer(

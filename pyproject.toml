@@ -36,6 +36,7 @@ torchmetrics = "^1.0.2"
 kedro-mlflow = "^0.11.9"
 plotly = "^5.15.0"
 black = "^23.9.1"
+pennylane-lightning = "^0.33.1"
 
 
 
