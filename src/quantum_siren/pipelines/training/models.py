@@ -92,10 +92,13 @@ class Model(torch.nn.Module):
             n_gates_per_layer=self.vqc(None),
         )
 
+        log.debug(f"Circuit:\n{qml.draw(self.qnode)(self.params)}")
+
     def initialize_params(self, n_qubits, n_layers, n_gates_per_layer):
         self.params = torch.nn.Parameter(
             torch.rand(size=(n_layers, n_qubits, n_gates_per_layer), requires_grad=True)
         )
+        self._inputs = torch.zeros(2)
         log.debug(f"Initialized Params: {self.params.size()}")
 
     def circuit(self, weights, inputs=None):
