@@ -34,10 +34,10 @@ class Model(torch.nn.Module):
 
         if output_interpretation != "all":
             output_interpretation = int(output_interpretation)
-            assert(
-                output_interpretation < n_qubits
-            ), f"Output interpretation parameter {output_interpretation} 
-            can either be a qubit (integer smaller n_qubits) or 'all'"
+            assert(output_interpretation < n_qubits), (
+                f"Output interpretation parameter {output_interpretation} "
+                "can either be a qubit (integer smaller n_qubits) or 'all'"
+            )
 
         self.output_interpretation = output_interpretation
 
