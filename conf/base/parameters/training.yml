@@ -21,5 +21,5 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
 
   # The following settings are ignored when n_qubits>6 because 
   # the fw then uses lightningQubit backend
-  max_processes: 4 # Set to "None" to disable multiprocessing
-  max_threads: 4 # Find a balance such that max_processes*max_threads <= n_vcpus
+  max_processes: -1 # Set to "None" to disable multiprocessing
+  max_threads: -1 # Find a balance such that max_processes*max_threads <= n_vcpus

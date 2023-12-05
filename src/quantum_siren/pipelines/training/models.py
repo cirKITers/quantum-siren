@@ -46,18 +46,25 @@ class Model(torch.nn.Module):
 
         self.data_reupload = data_reupload
 
-        os.environ["OMP_NUM_THREADS"] = f"{max_threads}"
-        if n_qubits <= 6:
-            log.debug(
-                f"Using default.qubit backend with {max_threads} threads and {max_processes} processes"
-            )
-
-            dev = qml.device(
-                "default.qubit",
-                wires=self.n_qubits,
-                shots=self.shots,
-                max_workers=self.max_processes,
-            )
+        if max_threads > 0:
+            os.environ["OMP_NUM_THREADS"] = f"{max_threads}"
+            log.debug("Setting OMP_NUM_THREADS to: " + os.environ["OMP_NUM_THREADS"])
+        if n_qubits <= 10:
+            if max_processes > 0:
+                log.debug(f"Using default.qubit backend with {max_processes} processes")
+                dev = qml.device(
+                    "default.qubit",
+                    wires=self.n_qubits,
+                    shots=self.shots,
+                    max_workers=self.max_processes,
+                )
+            else:
+                log.debug(f"Using default.qubit backend")
+                dev = qml.device(
+                    "default.qubit",
+                    wires=self.n_qubits,
+                    shots=self.shots,
+                )
         else:
             batch_obs = (
                 True if n_qubits > 20 else False
