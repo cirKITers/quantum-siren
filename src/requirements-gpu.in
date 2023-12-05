@@ -1,0 +1,13 @@
+pennylane
+pillow
+scikit-image
+ipykernel
+matplotlib
+kedro
+torchsummary
+torchmetrics
+kedro-mlflow
+plotly
+dask
+black
+torchvision
