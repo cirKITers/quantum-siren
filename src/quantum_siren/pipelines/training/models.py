@@ -37,7 +37,7 @@ class Model(torch.nn.Module):
             assert (
                 output_interpretation < n_qubits
             ), f"Output interpretation parameter {output_interpretation} can
-            either be a qubit (integer smaller n_qubits) or 'all'"
+            either be a qubit (integer smaller n_qubits) or 'all'" # noqa
 
         self.output_interpretation = output_interpretation
 
