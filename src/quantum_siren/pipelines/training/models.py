@@ -41,6 +41,9 @@ class Model(torch.nn.Module):
             assert (
                 output_interpretation < n_qubits
             ), f"Output interpretation parameter {output_interpretation} can either be a qubit (integer smaller n_qubits) or 'all'"
+            self.measurements = [output_interpretation]
+        else:
+            self.measurements = range(self.n_qubits)
 
         self.output_interpretation = output_interpretation
 
@@ -119,7 +122,7 @@ class Model(torch.nn.Module):
 
             self.vqc(l_params)
 
-        return [qml.expval(qml.PauliZ(i)) for i in range(self.n_qubits)]
+        return [qml.expval(qml.PauliZ(i)) for i in self.measurements]
 
     def predict(self, context, model_input):
         if type(model_input) != torch.Tensor:
@@ -140,10 +143,7 @@ class Model(torch.nn.Module):
             #     out = pool.starmap(self.qnode, [[params, coord] for coord in model_input])
 
             for i, coord in enumerate(model_input):
-                if self.output_interpretation == "all":
-                    out[i] = torch.mean(self.qlayer(coord), axis=0)
-                else:
-                    out[i] = self.qlayer(coord)[self.output_interpretation]
+                out[i] = torch.mean(self.qlayer(coord), axis=0)
         else:
             out = self.qlayer(model_input)[-1]
 
