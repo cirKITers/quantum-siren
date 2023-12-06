@@ -34,7 +34,7 @@ class Model(torch.nn.Module):
 
         if output_interpretation != "all":
             output_interpretation = int(output_interpretation)
-            assert(output_interpretation < n_qubits), (
+            assert output_interpretation < n_qubits, (
                 f"Output interpretation parameter {output_interpretation} "
                 "can either be a qubit (integer smaller n_qubits) or 'all'"
             )
@@ -79,6 +79,8 @@ class Model(torch.nn.Module):
                 )  # half because the coordinates already have 2 dims
 
             self.vqc(l_params)
+
+            qml.Barrier()
 
         return [qml.expval(qml.PauliZ(i)) for i in range(self.n_qubits)]
 
