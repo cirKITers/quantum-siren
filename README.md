@@ -20,10 +20,25 @@ This project is built using the [Kedro Framework](https://docs.kedro.org).
 
 ### Install Dependencies :floppy_disk:
 
-Using pip:
+**Using pip**:
 ```
-pip install -r src/requirements.txt
+pip install -r src/requirements.in
 ```
+or 
+```
+pip install -r src/requirements-gpu.in
+```
+if you want to have the GPU package of PyTorch
+
+**Using poetry**:
+```
+poetry install
+```
+or 
+```
+poetry install --extras='gpu'
+```
+if you want to have the GPU package of PyTorch
 
 ### Running Experiments :running:
 

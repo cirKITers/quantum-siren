@@ -37,7 +37,12 @@ class Instructor:
         report_figure_every_n_steps,
         optimizer,
         loss,
+        seed,
     ) -> None:
+        # this sets a global seed, that, according to documentation, affects the
+        # weight initialization and dataloader
+        torch.manual_seed(seed)
+
         self.steps_till_summary = report_figure_every_n_steps
 
         self.model = Model(
@@ -216,6 +221,7 @@ def training(
     model_input,
     ground_truth,
     steps,
+    seed,
 ):
     instructor = Instructor(
         n_layers,
@@ -228,15 +234,15 @@ def training(
         report_figure_every_n_steps,
         optimizer,
         loss,
+        seed,
     )
 
     model = instructor.train(model_input, ground_truth, steps)
 
     logging.info("Logging Model to MlFlow")
-    mlflow.pyfunc.log_model(
-        python_model=model,
+    mlflow.pytorch.log_model(
+        pytorch_model=model,
         artifact_path="qameraman",
-        input_example=model_input.numpy()[0],
     )
 
     return {"model": model}
