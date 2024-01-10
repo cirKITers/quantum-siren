@@ -61,13 +61,30 @@ The following parameters can be adjusted:
 - Data Preprocessing Parameters: `conf/base/parameters/preprocessing.yml`
   - Image sidelength
 - Training Parameters: `conf/base/parameters/data_science.yml`
-  - Number of layers
   - Number of qubits
-  - Number of steps
+  - Number of layers
+  - Type of VQC ansatz. Currently available are:
+    - "circuit_19"
+    - "circuit_18"
+  - Type of IEC ansatz. Currently available are:
+    - "default": RX and RY for both image axis as subsequent gates acting on each qubit
+    - "spread_layers": RX and RY alternating across the available qubits
+  - Data reuploading as float value [0..1]
+    - 1 means each layer has data reuploading
+    - 0.5 means each second layer has data reuploading
+    - 0 means no data reuploading is applied
+  - Number of training steps
   - Shots (none/ number of shots)
-  - Data reuploading
   - Learning rate
-  - Type of ansatz for VQC and data encoding
+  - Optimizer. Currently, only "Adam" is available
+  - Loss. Currently available are:
+    - "mse": Mean Square Error
+    - "ssim": Structural Similarity Index Measure
+    - "fft_ssim": Same as SSIM but measured in the frequency domain
+    - "psnr": Peak Signal-to-Noise Ratio
+  - Output interpretation. Currently available are:
+    - "all": Measurement of all qubits and normalization
+    - Index of a specific qubit
 
 ## Literature :books:
 
