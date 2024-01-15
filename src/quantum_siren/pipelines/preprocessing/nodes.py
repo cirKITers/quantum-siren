@@ -14,6 +14,10 @@ import math
 
 import plotly.graph_objects as go
 
+import logging
+
+log = logging.getLogger(__name__)
+
 
 def get_cameraman_tensor(sidelength):
     """
@@ -54,6 +58,19 @@ class ImageFitting(Dataset):
         img = get_cameraman_tensor(sidelength)
         self.pixels = img.permute(1, 2, 0).view(-1, 1)
         self.coords = get_mgrid(sidelength, 2)
+
+class CosineFitting(Dataset):
+    def __init__(self, omega_d, x_domain):
+        n_d = int(torch.ceil(2 * torch.max(torch.abs(x_domain)) * torch.max(omega_d)))
+
+        log.info(f"Using {n_d} data points")
+
+        self.coords = torch.linspace(x_domain[0], x_domain[1], n_d)
+
+        # Formula (4) in referenced paper 2309.03279
+        y = lambda x: 1 / torch.linalg.norm(omega_d) * torch.sum(torch.cos(omega_d * x))
+
+        self.pixels = torch.stack([y(x) for x in self.coords])
 
     def __len__(self):
         return 1
