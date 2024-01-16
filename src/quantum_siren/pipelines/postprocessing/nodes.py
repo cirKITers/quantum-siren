@@ -197,7 +197,9 @@ def plot_gradients(model, ground_truth, coordinates):
 
     gt_laplace_dcdc = scipy.ndimage.laplace(gt_image)
 
-    gt_laplacian_fig = go.Figure(data=go.Heatmap(z=gt_laplace_dcdc, colorscale="RdBu", zmid=0))
+    gt_laplacian_fig = go.Figure(
+        data=go.Heatmap(z=gt_laplace_dcdc, colorscale="RdBu", zmid=0)
+    )
 
     gt_laplacian_fig.update_layout(
         yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
@@ -206,10 +208,10 @@ def plot_gradients(model, ground_truth, coordinates):
     # mlflow.log_figure(fig, f"laplacian.html")
 
     return {
-        "pred_gradients_fig":pred_gradients_fig,
-        "pred_laplacian_fig":pred_laplacian_fig,
-        "gt_gradients_fig":gt_gradients_fig,
-        "gt_laplacian_fig":gt_laplacian_fig,
+        "pred_gradients_fig": pred_gradients_fig,
+        "pred_laplacian_fig": pred_laplacian_fig,
+        "gt_gradients_fig": gt_gradients_fig,
+        "gt_laplacian_fig": gt_laplacian_fig,
     }
 
 
