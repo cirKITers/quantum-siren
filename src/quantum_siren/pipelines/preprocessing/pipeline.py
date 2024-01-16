@@ -5,56 +5,60 @@ generated using Kedro 0.18.12
 
 from kedro.pipeline import Pipeline, pipeline, node
 from .nodes import (
-    generate_image,
+    generate_dataset,
     construct_dataloader,
-    transform_data,
+    extract_data,
     gen_ground_truth_fig,
 )
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    nd_generate_img = node(
-        generate_image,
-        inputs={"sidelength": "params:sidelength"},
-        outputs={"img": "img"},
+    nd_generate_dataset = node(
+        generate_dataset,
+        inputs={
+            "mode": "params:mode",
+            "domain": "params:domain",
+            "scale_domain_by_pi": "params:scale_domain_by_pi",
+            "sidelength": "params:sidelength",
+            "nonlinear_coords": "params:nonlinear_coords",
+            "omega": "params:omega",
+        },
+        outputs={"dataset": "dataset"},
     )
     nd_gen_ground_truth_fig = node(
         gen_ground_truth_fig,
         inputs={
-            "img": "img",
+            "dataset": "dataset",
         },
-        outputs={
-            "ground_truth_fig":"ground_truth_fig"
-        },
+        outputs={"ground_truth_fig": "ground_truth_fig"},
     )
     nd_construct_dataloader = node(
         construct_dataloader,
         inputs={
-            "img": "img",
+            "dataset": "dataset",
             "batch_size": "params:batch_size",
-            "pin_memory": "params:pin_memory",
-            "num_workers": "params:num_workers",
         },
         outputs={"dataloader": "dataloader"},
     )
-    nd_transform_data = node(
-        transform_data,
+    nd_extract_data = node(
+        extract_data,
         inputs={
-            "dataloader": "dataloader",
-            "nonlinear_coords": "params:nonlinear_coords",
-            "img_val_min": "params:img_val_min",
-            "img_val_max": "params:img_val_max",
+            "dataset": "dataset",
         },
         outputs={"coordinates": "coordinates", "values": "values"},
     )
 
     return pipeline(
         [
-            nd_generate_img,
+            nd_generate_dataset,
             nd_gen_ground_truth_fig,
             nd_construct_dataloader,
-            nd_transform_data,
+            nd_extract_data,
         ],
-        outputs={"coordinates": "coordinates", "values": "values"},
+        outputs={
+            "coordinates": "coordinates",
+            "values": "values",
+            "dataloader": "dataloader",
+        },
         namespace="preprocessing",
     )
