@@ -33,6 +33,7 @@ class Instructor:
         shots,
         report_figure_every_n_steps,
         optimizer,
+        output_interpretation,
         loss,
         seed,
     ) -> None:
@@ -43,7 +44,13 @@ class Instructor:
         self.steps_till_summary = report_figure_every_n_steps
 
         self.model = Model(
-            n_qubits, shots, vqc_ansatz, iec_ansatz, n_layers, data_reupload
+            n_qubits,
+            shots,
+            vqc_ansatz,
+            iec_ansatz,
+            n_layers,
+            data_reupload,
+            output_interpretation,
         )
 
         if optimizer == "QNG":
@@ -243,6 +250,7 @@ def training(
     shots,
     report_figure_every_n_steps,
     optimizer,
+    output_interpretation,
     loss,
     dataloader,
     steps,
@@ -258,6 +266,7 @@ def training(
         shots,
         report_figure_every_n_steps,
         optimizer,
+        output_interpretation,
         loss,
         seed,
     )
