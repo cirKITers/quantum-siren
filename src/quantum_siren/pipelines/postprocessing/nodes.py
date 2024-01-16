@@ -55,7 +55,7 @@ def upscaling(model, coordinates, factor):
     # mlflow.log_figure(fig, f"{factor}x_upscaled_prediction.html")
 
     return {
-        "pred_upscaled_fig":pred_upscaled_fig,
+        "pred_upscaled_fig": pred_upscaled_fig,
         "upscaled_image": model_output.detach(),
         "upscaled_coordinates": upscaled_coordinates,
     }
@@ -80,9 +80,7 @@ def pixelwise_difference(prediction, ground_truth):
 
     # mlflow.log_figure(fig, f"pixelwise_differences.html")
 
-    return {
-        "pixelwise_diff_fig": pixelwise_diff_fig
-    }
+    return {"pixelwise_diff_fig": pixelwise_diff_fig}
 
 
 def plot_gradients(model, ground_truth, coordinates):
