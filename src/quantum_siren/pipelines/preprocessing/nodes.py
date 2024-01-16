@@ -100,12 +100,31 @@ class CosineFitting(Dataset):
         if idx > 0:
             raise IndexError
 
-        return self.coords, self.pixels
+        return self.coords, self.values
 
 
-def generate_image(sidelength):
-    img = ImageFitting(sidelength)
-    return {"img": img}
+def generate_dataset(
+    mode,
+    domain,
+    scale_domain_by_pi,
+    sidelength,
+    nonlinear_coords,
+    omega,
+):
+    if scale_domain_by_pi:
+        domain = torch.tensor(
+            [domain[0] * torch.pi, domain[1] * torch.pi], dtype=torch.float
+        )
+    else:
+        domain = torch.tensor([domain[0], domain[1]], dtype=torch.float)
+
+    omega = torch.tensor(omega, dtype=torch.float)
+
+    if mode == "image":
+        dataset = ImageFitting(domain, sidelength, nonlinear_coords)
+    elif mode == "cosine":
+        dataset = CosineFitting(domain, omega)
+    return {"dataset": dataset}
 
 
 def construct_dataloader(img, batch_size, pin_memory, num_workers):
