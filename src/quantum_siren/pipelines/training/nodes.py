@@ -160,22 +160,32 @@ class Instructor:
             # mlflow.log_metric("Loss", loss_val.item(), step)
 
             for name, metric in self.metrics.items():
-                val = metric(model_output, ground_truth)
+                val = metric(preds, values)
                 mlflow.log_metric(name, val, step)
 
             if not step % self.steps_till_summary:
                 # print(self.params)
                 # print(f"Step {step}:\t Loss: {loss_val.item()}\t SSIM: {ssim_val}")
-                fig = go.Figure(
-                    data=go.Heatmap(
-                        z=model_output.cpu()
-                        .view(self.sidelength, self.sidelength)
-                        .detach()
-                        .numpy(),
-                        colorscale="RdBu",
-                        zmid=0,
+
+                if self.sidelength != -1:
+                    fig = go.Figure(
+                        data=go.Heatmap(
+                            z=preds.cpu()
+                            .view(self.sidelength, self.sidelength)
+                            .detach()
+                            .numpy(),
+                            colorscale="RdBu",
+                            zmid=0,
+                        )
                     )
-                )
+                else:
+                    fig = go.Figure(
+                        data=go.Scatter(
+                            z=preds.cpu().detach().numpy(),
+                            mode="lines",
+                        )
+                    )
+
                 fig.update_layout(
                     yaxis=dict(scaleanchor="x", autorange="reversed"),
                     plot_bgcolor="rgba(0,0,0,0)",
