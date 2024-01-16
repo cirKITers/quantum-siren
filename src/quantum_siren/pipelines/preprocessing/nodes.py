@@ -53,11 +53,31 @@ class ImageFitting(Dataset):
     Code from https://doi.org/10.48550/arXiv.2006.09661
     """
 
-    def __init__(self, sidelength):
+    def __init__(
+        self, domain, sidelength, nonlinear_coords=False, img_val_min=0, img_val_max=1
+    ):
         super().__init__()
+        self.sidelength = sidelength
         img = get_cameraman_tensor(sidelength)
-        self.pixels = img.permute(1, 2, 0).view(-1, 1)
+        values = img.permute(1, 2, 0).view(-1, 1)
         self.coords = get_mgrid(sidelength, 2)
+
+        # scale the model input between 0..pi
+        if nonlinear_coords:
+            self.coords = (torch.asin(self.coords) + torch.pi / 2) / 2
+
+        # scale the data between -1..1 (yeah, I know that's ugly)
+        # values = 2/(torch.abs(values.max() - values.min())) * (-values.min() + values) - 1
+        self.values = minmax_scaler(values, -1, 1)
+
+    def __len__(self):
+        assert len(self.coords) == len(self.values)
+        assert self.coords.shape[1] == 2
+        return len(self.coords)
+
+    def __getitem__(self, idx):
+        return self.coords[idx], self.values[idx]
+
 
 class CosineFitting(Dataset):
     def __init__(self, omega_d, x_domain):
