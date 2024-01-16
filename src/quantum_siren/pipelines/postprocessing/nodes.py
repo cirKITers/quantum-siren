@@ -12,6 +12,9 @@ import scipy
 import numpy as np
 import matplotlib.colors as colors
 import plotly.express as px
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def predict(model, coordinates):
@@ -237,28 +240,40 @@ def grads2img(grads_x, grads_y, sidelength):
 
 
 def calculate_spectrum(values):
-    sidelength = int(math.sqrt(values.shape[0]))
+    if len(values.shape) > 1:
+        sidelength = int(math.sqrt(values.shape[0]))
 
-    spectrum = torch.fft.fft2(values.view(sidelength, sidelength))
-    spectrum = torch.fft.fftshift(spectrum)
+        spectrum = torch.fft.fft2(values.view(sidelength, sidelength))
+        spectrum = torch.fft.fftshift(spectrum)
 
-    spectrum_abs_fig = go.Figure(
-        data=go.Heatmap(z=torch.log(spectrum.abs()).numpy(), colorscale="gray")
-    )
-    spectrum_abs_fig.update_layout(
-        yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
-    )
+        spectrum_abs_fig = go.Figure(
+            data=go.Heatmap(z=torch.log(spectrum.abs()).numpy(), colorscale="gray")
+        )
+        spectrum_abs_fig.update_layout(
+            yaxis=dict(scaleanchor="x", autorange="reversed"),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
 
-    # mlflow.log_figure(fig, f"spectrum_abs.html")
+        # mlflow.log_figure(fig, f"spectrum_abs.html")
 
-    spectrum_phase_fig = go.Figure(data=go.Heatmap(z=spectrum.angle().numpy(), colorscale="gray"))
-    spectrum_phase_fig.update_layout(
-        yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
-    )
+        spectrum_phase_fig = go.Figure(
+            data=go.Heatmap(z=spectrum.angle().numpy(), colorscale="gray")
+        )
+        spectrum_phase_fig.update_layout(
+            yaxis=dict(scaleanchor="x", autorange="reversed"),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
 
-    # mlflow.log_figure(fig, f"spectrum_phase.html")
+        # mlflow.log_figure(fig, f"spectrum_phase.html")
 
-    return {
-        "spectrum_abs_fig":spectrum_abs_fig,
-        "spectrum_phase_fig":spectrum_phase_fig,
-    }
+        return {
+            "spectrum_abs_fig": spectrum_abs_fig,
+            "spectrum_phase_fig": spectrum_phase_fig,
+        }
+    else:
+        log.warning("Calculation of non-image data not supported yet")
+
+        return {
+            "spectrum_abs_fig": go.Figure(),
+            "spectrum_phase_fig": go.Figure(),
+        }
