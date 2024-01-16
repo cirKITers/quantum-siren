@@ -138,33 +138,32 @@ def minmax_scaler(data, min_norm, max_norm):
     ) + min_norm
 
 
-def transform_data(dataloader, nonlinear_coords, img_val_min, img_val_max):
-    coordinates, values = next(iter(dataloader))
-    coordinates = coordinates.reshape(-1, 2)
-
-    # scale the model input between 0..pi
-    if nonlinear_coords:
-        coordinates = (torch.asin(coordinates) + torch.pi / 2) / 2
-
-    # scale the data between -1..1 (yeah, I know that's ugly)
-    # values = 2/(torch.abs(values.max() - values.min())) * (-values.min() + values) - 1
-    values = minmax_scaler(values, img_val_min, img_val_max)
-
-    return {"coordinates": coordinates, "values": values.view(-1)}
+def extract_data(dataset):
+    return {"coordinates": dataset.coords, "values": dataset.values}
 
 
-def gen_ground_truth_fig(img):
-    sidelength = int(math.sqrt(img.coords.shape[0]))
-    ground_truth_fig = go.Figure(
-        data=go.Heatmap(
-            z=img.pixels.view(sidelength, sidelength).detach().numpy(),
-            colorscale="RdBu",
-            zmid=0,
+def gen_ground_truth_fig(dataset):
+    if hasattr(dataset, "sidelength"):
+        sidelength = dataset.sidelength
+        ground_truth_fig = go.Figure(
+            data=go.Heatmap(
+                z=dataset.values.view(sidelength, sidelength).detach().numpy(),
+                colorscale="RdBu",
+                zmid=0,
+            )
         )
-    )
-    ground_truth_fig.update_layout(
-        yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
-    )
+        ground_truth_fig.update_layout(
+            yaxis=dict(scaleanchor="x", autorange="reversed"),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+    else:
+        ground_truth_fig = go.Figure(
+            data=go.Scatter(
+                x=dataset.coords.detach().numpy(),
+                y=dataset.values.detach().numpy(),
+                mode="lines",
+            )
+        )
 
     # mlflow.log_figure(fig, f"ground_truth.html")
 
