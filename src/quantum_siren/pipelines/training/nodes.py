@@ -244,8 +244,7 @@ def training(
     report_figure_every_n_steps,
     optimizer,
     loss,
-    model_input,
-    ground_truth,
+    dataloader,
     steps,
     seed,
 ):
@@ -263,7 +262,7 @@ def training(
         seed,
     )
 
-    model = instructor.train(model_input, ground_truth, steps)
+    model = instructor.train(dataloader, steps)
 
     logging.info("Logging Model to MlFlow")
     mlflow.pytorch.log_model(
