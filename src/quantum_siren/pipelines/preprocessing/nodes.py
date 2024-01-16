@@ -80,17 +80,18 @@ class ImageFitting(Dataset):
 
 
 class CosineFitting(Dataset):
-    def __init__(self, omega_d, x_domain):
-        n_d = int(torch.ceil(2 * torch.max(torch.abs(x_domain)) * torch.max(omega_d)))
+    def __init__(self, domain, omega_d):
+        n_d = int(torch.ceil(2 * torch.max(torch.abs(domain)) * torch.max(omega_d)))
 
         log.info(f"Using {n_d} data points")
 
-        self.coords = torch.linspace(x_domain[0], x_domain[1], n_d)
+        # self.coords = torch.linspace(x_domain[0], x_domain[1], n_d)
+        self.coords = get_mgrid(domain, n_d, dim=1)
 
         # Formula (4) in referenced paper 2309.03279
         y = lambda x: 1 / torch.linalg.norm(omega_d) * torch.sum(torch.cos(omega_d * x))
 
-        self.pixels = torch.stack([y(x) for x in self.coords])
+        self.values = torch.stack([y(x) for x in self.coords])
 
     def __len__(self):
         return 1
