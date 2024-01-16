@@ -127,10 +127,8 @@ def generate_dataset(
     return {"dataset": dataset}
 
 
-def construct_dataloader(img, batch_size, pin_memory, num_workers):
-    dataloader = DataLoader(
-        img, batch_size=batch_size, pin_memory=pin_memory, num_workers=num_workers
-    )
+def construct_dataloader(dataset, batch_size):
+    dataloader = DataLoader(dataset, batch_size=batch_size, pin_memory=True)
     return {"dataloader": dataloader}
 
 
