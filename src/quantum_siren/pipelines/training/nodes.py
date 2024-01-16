@@ -128,8 +128,11 @@ class Instructor:
 
         return val
 
-    def calculate_sidelength(self, img):
-        self.sidelength = int(math.sqrt(img.shape[0]))
+    def set_sidelength(self, dataloader):
+        if hasattr(dataloader.dataset, "sidelength"):
+            self.sidelength = dataloader.dataset.sidelength
+        else:
+            self.sidelength = -1
 
     def train(self, model_input, ground_truth, steps):
         self.calculate_sidelength(ground_truth)
