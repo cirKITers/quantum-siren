@@ -134,13 +134,29 @@ class Instructor:
         else:
             self.sidelength = -1
 
-    def train(self, model_input, ground_truth, steps):
-        self.calculate_sidelength(ground_truth)
+    def train(self, dataloader, steps):
+        self.set_sidelength(dataloader)
 
         for step in range(steps):
-            model_output = self.model(model_input)
+            preds = []
+            values = []
 
-            loss_val = self.cost(model_output, ground_truth)
+            # Iterate the dataloader
+            for coord, value in iter(dataloader):
+                # coords: bx2
+                # values: bx1
+                pred = self.model(coord)
+
+                # preds: b -> bx1 (to match with shape of values)
+                preds.append(pred.reshape(-1, 1))
+                values.append(value)
+
+            if self.sidelength != -1:
+                # reshape everything to get back an "image"
+                preds = torch.stack(preds).reshape(self.sidelength, self.sidelength)
+                values = torch.stack(values).reshape(self.sidelength, self.sidelength)
+
+            loss_val = self.cost(preds, values)
             # mlflow.log_metric("Loss", loss_val.item(), step)
 
             for name, metric in self.metrics.items():
