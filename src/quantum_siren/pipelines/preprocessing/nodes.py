@@ -128,7 +128,12 @@ def generate_dataset(
 
 
 def construct_dataloader(dataset, batch_size):
-    dataloader = DataLoader(dataset, batch_size=batch_size, pin_memory=True)
+    if batch_size > len(dataset.coords):
+        log.debug(
+            f"Adjusting batch size to {len(dataset.coords)} (was {batch_size} before)"
+        )
+    bs = min(batch_size, len(dataset.coords))
+    dataloader = DataLoader(dataset, batch_size=bs, pin_memory=True)
     return {"dataloader": dataloader}
 
 
