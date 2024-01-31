@@ -65,7 +65,6 @@ class Instructor:
         else:
             raise KeyError(f"No optimizer {optimizer} in {optimizers}")
         # self.optim = torch.optim.Adam(lr=learning_rate, params=self.model.parameters())
-        pass
 
         self.metrics = {
             "mse": self.mse,
@@ -151,30 +150,37 @@ class Instructor:
         self.set_sidelength(dataloader)
 
         for step in range(steps):
-            preds = []
-            values = []
+            metrics = {}
+            loss_val = 0
 
+            preds = []
+            targets = []
+            coords = []
             # Iterate the dataloader
-            for coord, value in iter(dataloader):
-                # coords: bx2
-                # values: bx1
+            for coord, target in iter(dataloader):
                 pred = self.model(coord)
 
-                # preds: b -> bx1 (to match with shape of values)
-                preds.append(pred.reshape(-1, 1))
-                values.append(value)
+                # # Idea is to create predictions, target and input independent
+                # # of the actual data and batch size, which allows reshaping them later
+                # preds = [*preds, *pred.flatten()]
+                # targets = [*targets, *target.flatten()]
+                # coords = [*coords, *coord.flatten()]
 
-            if self.sidelength != -1:
-                # reshape everything to get back an "image"
-                preds = torch.stack(preds).reshape(self.sidelength, self.sidelength)
-                values = torch.stack(values).reshape(self.sidelength, self.sidelength)
+                loss = self.cost(pred, target)
 
-            loss_val = self.cost(preds, values)
-            # mlflow.log_metric("Loss", loss_val.item(), step)
+                self.optim.zero_grad()
+                loss.backward()
+                self.optim.step()
+
+                loss_val += loss.item()
+            loss_val /= len(dataloader)
+
+            coords = dataloader.dataset.coords
+            preds = self.model(coords)
+            targets = dataloader.dataset.values
 
             for name, metric in self.metrics.items():
-                val = metric(preds, values)
-                mlflow.log_metric(name, val, step)
+                mlflow.log_metric(name, metric(preds, targets) / len(dataloader), step)
 
             if not step % self.steps_till_summary:
                 # print(self.params)
@@ -191,18 +197,28 @@ class Instructor:
                             zmid=0,
                         )
                     )
+                    fig.update_layout(
+                        yaxis=dict(scaleanchor="x", autorange="reversed"),
+                        plot_bgcolor="rgba(0,0,0,0)",
+                    )
                 else:
                     fig = go.Figure(
-                        data=go.Scatter(
-                            z=preds.cpu().detach().numpy(),
-                            mode="lines",
-                        )
+                        data=[
+                            go.Scatter(
+                                x=coords,
+                                y=preds.cpu().detach().numpy(),
+                                mode="lines",
+                                name="Prediction",
+                            ),
+                            go.Scatter(
+                                x=coords, y=targets, mode="lines", name="Target"
+                            ),
+                        ]
                     )
-
-                fig.update_layout(
-                    yaxis=dict(scaleanchor="x", autorange="reversed"),
-                    plot_bgcolor="rgba(0,0,0,0)",
-                )
+                    fig.update_layout(
+                        yaxis=dict(range=[-1.1, 1.1]),
+                        plot_bgcolor="rgba(0,0,0,0)",
+                    )
 
                 mlflow.log_figure(fig, f"prediction_step_{step}.html")
                 # print(f"Params: {params}")
@@ -213,11 +229,7 @@ class Instructor:
                 # axes[1].imshow(img_grad.norm(dim=-1).cpu().view(sidelength,sidelength).detach().numpy())
                 # axes[2].imshow(img_laplacian.cpu().view(sidelength,sidelength).detach().numpy())
                 # plt.show()
-                log.debug(f"Step {step}:\t Loss: {loss_val.item()}")
-
-            self.optim.zero_grad()
-            loss_val.backward()
-            self.optim.step()
+                log.debug(f"Step {step}:\t Loss: {loss_val}")
 
         return self.model
 
