@@ -67,8 +67,9 @@ class ansaetze:
     @staticmethod
     def default(params, **kwargs):
         for q, q_params in enumerate(params):
-            qml.RX(q_params[0], wires=q)
-            qml.RY(q_params[1], wires=q)
+            qml.RX(q_params[:, 0], wires=q)
+            if q_params.shape[1] > 1:
+                qml.RY(q_params[:, 1], wires=q)
 
     @staticmethod
     def spread_layers(params, **kwargs):
@@ -76,4 +77,5 @@ class ansaetze:
             if 2 * q + 1 > params.shape[0] - 1:
                 break
             qml.RY(q_params[0], wires=2 * q)
-            qml.RY(q_params[1], wires=2 * q + 1)
+            if q_params.shape[1] > 1:
+                qml.RY(q_params[1], wires=2 * q + 1)
