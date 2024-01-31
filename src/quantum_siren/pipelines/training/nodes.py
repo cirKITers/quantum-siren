@@ -97,6 +97,8 @@ class Instructor:
         return self.loss(*args) * self.loss_sign
 
     def fft_ssim(self, pred, target):
+        if self.sidelength == -1:
+            return -1
         pred_spectrum = torch.fft.fft2(pred.view(self.sidelength, self.sidelength))
         pred_spectrum = torch.fft.fftshift(pred_spectrum)
 
@@ -113,6 +115,8 @@ class Instructor:
         ) / 2  # because we want to match phase and amplitude but keep the result <=1
 
     def ssim(self, pred, target):
+        if self.sidelength == -1:
+            return -1
         ssim = StructuralSimilarityIndexMeasure(data_range=1.0)
         val = ssim(
             pred.reshape(1, 1, self.sidelength, self.sidelength),
@@ -122,6 +126,8 @@ class Instructor:
         return val
 
     def psnr(self, pred, target):
+        if self.sidelength == -1:
+            return -1
         psnr = PeakSignalNoiseRatio(data_range=1.0)
         val = psnr(
             pred.reshape(1, 1, self.sidelength, self.sidelength),
