@@ -5,13 +5,13 @@
 # Link: https://docs.kedro.org/en/0.18.12/kedro_project_setup/configuration.html#parameters
 
 preprocessing:
-  batch_size: 2
-  mode: "cosine" # image, cosine
+  batch_size: 10
+  mode: "image" # image, cosine
   domain: [-1,1] # domain of x values
   scale_domain_by_pi: True
 
   # 'image' mode parameter
-  sidelength: 14
+  sidelength: 11
   nonlinear_coords: False
 
   # 'cosine' mode parameter
