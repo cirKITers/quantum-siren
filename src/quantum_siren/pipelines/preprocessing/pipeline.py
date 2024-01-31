@@ -45,7 +45,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         inputs={
             "dataset": "dataset",
         },
-        outputs={"coordinates": "coordinates", "values": "values"},
+        outputs={"coordinates": "coordinates", "target": "target", "shape": "shape"},
     )
 
     return pipeline(
@@ -57,7 +57,8 @@ def create_pipeline(**kwargs) -> Pipeline:
         ],
         outputs={
             "coordinates": "coordinates",
-            "values": "values",
+            "target": "target",
+            "shape": "shape",
             "dataloader": "dataloader",
         },
         namespace="preprocessing",
