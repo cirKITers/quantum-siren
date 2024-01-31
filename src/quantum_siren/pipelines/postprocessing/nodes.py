@@ -52,8 +52,6 @@ def upscaling(model, coordinates, factor):
         yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
     )
 
-    # mlflow.log_figure(fig, f"{factor}x_upscaled_prediction.html")
-
     return {
         "pred_upscaled_fig": pred_upscaled_fig,
         "upscaled_image": model_output.detach(),
@@ -77,8 +75,6 @@ def pixelwise_difference(prediction, ground_truth):
     pixelwise_diff_fig.update_layout(
         yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
     )
-
-    # mlflow.log_figure(fig, f"pixelwise_differences.html")
 
     return {"pixelwise_diff_fig": pixelwise_diff_fig}
 
@@ -107,23 +103,7 @@ def plot_gradients(model, ground_truth, coordinates):
         sidelength,
     )
 
-    pred_gradients_fig = px.imshow(pred_dc_img)
-
-    # pred_normed_dc = pred_dc.norm(dim=-1)
-
-    # fig = go.Figure(data =
-    #                 go.Heatmap(z = pred_normed_dc.cpu().view(sidelength, sidelength).detach().numpy(), colorscale='RdBu', zmid=0)
-    #             )
-
-    # fig.update_layout(
-    #     yaxis=dict(
-    #         scaleanchor='x',
-    #         autorange='reversed'
-    #     ),
-    #     plot_bgcolor='rgba(0,0,0,0)'
-    # )
-
-    # mlflow.log_figure(fig, f"prediction_gradients.html")
+        pred_gradients_fig = px.imshow(pred_dc_img)
 
     # ----------------------------------------------------------------
     # Laplacian Prediction
@@ -155,11 +135,7 @@ def plot_gradients(model, ground_truth, coordinates):
         )
     )
 
-    pred_laplacian_fig.update_layout(
-        yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
-    )
-
-    # mlflow.log_figure(fig, f"prediction_laplacian.html")
+        pred_laplacian_fig.update_layout(
 
     # ----------------------------------------------------------------
     # Gradient Ground Truth
@@ -171,24 +147,7 @@ def plot_gradients(model, ground_truth, coordinates):
 
     gt_dc_img = grads2img(gt_dcx, gt_dcy, sidelength)
 
-    gt_gradients_fig = px.imshow(gt_dc_img)
-
-    # gt_dc = torch.stack((gt_dcx, gt_dcy), dim=-1).view(-1, 2)
-    # gt_normed_dc = gt_dc.norm(dim=-1)
-
-    # fig = go.Figure(data =
-    #                 go.Heatmap(z = gt_normed_dc.cpu().view(sidelength, sidelength).detach().numpy(), colorscale='RdBu', zmid=0)
-    #             )
-
-    # fig.update_layout(
-    #     yaxis=dict(
-    #         scaleanchor='x',
-    #         autorange='reversed'
-    #     ),
-    #     plot_bgcolor='rgba(0,0,0,0)'
-    # )
-
-    # mlflow.log_figure(fig, f"gradients.html")
+        gt_gradients_fig = px.imshow(gt_dc_img)
 
     # ----------------------------------------------------------------
     # Laplacian Ground Truth
@@ -203,7 +162,7 @@ def plot_gradients(model, ground_truth, coordinates):
         yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
     )
 
-    # mlflow.log_figure(fig, f"laplacian.html")
+    else:
 
     return {
         "pred_gradients_fig": pred_gradients_fig,
@@ -254,8 +213,6 @@ def calculate_spectrum(values):
             plot_bgcolor="rgba(0,0,0,0)",
         )
 
-        # mlflow.log_figure(fig, f"spectrum_abs.html")
-
         spectrum_phase_fig = go.Figure(
             data=go.Heatmap(z=spectrum.angle().numpy(), colorscale="gray")
         )
@@ -264,16 +221,5 @@ def calculate_spectrum(values):
             plot_bgcolor="rgba(0,0,0,0)",
         )
 
-        # mlflow.log_figure(fig, f"spectrum_phase.html")
-
-        return {
-            "spectrum_abs_fig": spectrum_abs_fig,
-            "spectrum_phase_fig": spectrum_phase_fig,
-        }
-    else:
+    elif len(shape) == 2:
         log.warning("Calculation of non-image data not supported yet")
-
-        return {
-            "spectrum_abs_fig": go.Figure(),
-            "spectrum_phase_fig": go.Figure(),
-        }
