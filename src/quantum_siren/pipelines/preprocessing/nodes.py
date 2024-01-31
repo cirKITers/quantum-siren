@@ -53,14 +53,13 @@ class ImageFitting(Dataset):
     Code from https://doi.org/10.48550/arXiv.2006.09661
     """
 
-    def __init__(
-        self, domain, sidelength, nonlinear_coords=False, img_val_min=0, img_val_max=1
-    ):
+    def __init__(self, domain, sidelength, nonlinear_coords=False):
         super().__init__()
         self.sidelength = sidelength
+        self.shape = (sidelength, sidelength, 1)
         img = get_cameraman_tensor(sidelength)
         values = img.permute(1, 2, 0).view(-1, 1)
-        self.coords = get_mgrid(sidelength, 2)
+        self.coords = get_mgrid(domain, sidelength, 2)
 
         # scale the model input between 0..pi
         if nonlinear_coords:
@@ -82,6 +81,7 @@ class ImageFitting(Dataset):
 class CosineFitting(Dataset):
     def __init__(self, domain, omega_d):
         n_d = int(torch.ceil(2 * torch.max(torch.abs(domain)) * torch.max(omega_d)))
+        self.shape = (n_d, 1)
 
         log.info(f"Using {n_d} data points")
 
@@ -91,16 +91,14 @@ class CosineFitting(Dataset):
         # Formula (4) in referenced paper 2309.03279
         y = lambda x: 1 / torch.linalg.norm(omega_d) * torch.sum(torch.cos(omega_d * x))
 
-        self.values = torch.stack([y(x) for x in self.coords])
+        self.values = torch.stack([y(x) for x in self.coords]).reshape(-1, 1)
 
     def __len__(self):
-        return 1
+        assert len(self.coords) == len(self.values)
+        return len(self.coords)
 
     def __getitem__(self, idx):
-        if idx > 0:
-            raise IndexError
-
-        return self.coords, self.values
+        return self.coords[idx], self.values[idx]
 
 
 def generate_dataset(
