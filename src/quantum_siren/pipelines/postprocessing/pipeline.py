@@ -30,6 +30,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             "model": "model",
             "coordinates": "coordinates",
             "factor": "params:upscale_factor",
+            "shape": "shape",
         },
         outputs={
             "pred_upscaled_fig": "pred_upscaled_fig",
@@ -40,7 +41,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 
     nd_pixelwise_diff = node(
         pixelwise_difference,
-        inputs={"prediction": "prediction", "ground_truth": "ground_truth"},
+        inputs={"prediction": "prediction", "target": "target", "shape": "shape"},
         outputs={"pixelwise_diff_fig": "pixelwise_diff_fig"},
     )
 
@@ -48,8 +49,9 @@ def create_pipeline(**kwargs) -> Pipeline:
         plot_gradients,
         inputs={
             "model": "model",
-            "ground_truth": "ground_truth",
+            "target": "target",
             "coordinates": "coordinates",
+            "shape": "shape",
         },
         outputs={
             "pred_gradients_fig": "pred_gradients_fig",
@@ -67,7 +69,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             nd_plot_gradients,
             node(
                 calculate_spectrum,
-                inputs={"values": "ground_truth"},
+                inputs={"values": "target", "shape": "shape"},
                 outputs={
                     "spectrum_abs_fig": "gt_spectrum_abs_fig",
                     "spectrum_phase_fig": "gt_spectrum_phase_fig",
@@ -75,7 +77,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
             node(
                 calculate_spectrum,
-                inputs={"values": "prediction"},
+                inputs={"values": "prediction", "shape": "shape"},
                 outputs={
                     "spectrum_abs_fig": "pred_spectrum_abs_fig",
                     "spectrum_phase_fig": "pred_spectrum_phase_fig",
@@ -85,7 +87,8 @@ def create_pipeline(**kwargs) -> Pipeline:
         inputs={
             "coordinates": "coordinates",
             "model": "model",
-            "ground_truth": "values",
+            "target": "target",
+            "shape": "shape",
         },
         outputs={"upscaled_image": "upscaled_image"},
         namespace="postprocessing",
