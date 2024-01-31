@@ -148,7 +148,7 @@ def extract_data(dataset):
 
 
 def gen_ground_truth_fig(dataset):
-    if hasattr(dataset, "sidelength"):
+    if len(dataset.shape) == 3:
         sidelength = dataset.sidelength
         ground_truth_fig = go.Figure(
             data=go.Heatmap(
