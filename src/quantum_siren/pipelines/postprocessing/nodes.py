@@ -23,147 +23,171 @@ def predict(model, coordinates):
     return {"prediction": model_output.view(-1).detach()}
 
 
-def upscaling(model, coordinates, factor):
-    sidelength = math.sqrt(coordinates.shape[0])
-    upscaled_sidelength = int(sidelength * factor)
+def upscaling(model, coordinates, factor, shape):
+    # 1-D case
+    if len(shape) == 2:
+        pred_upscaled_fig = go.Figure()
+        model_output = model(coordinates).detach()
+        upscaled_coordinates = coordinates
+    # 2-D case
+    elif len(shape) == 3:
+        sidelength = math.sqrt(coordinates.shape[0])
+        upscaled_sidelength = int(sidelength * factor)
 
-    upscaled_coordinates = torch.zeros(size=(upscaled_sidelength**2, 2))
-    it = 0
-    for x in torch.linspace(coordinates.min(), coordinates.max(), upscaled_sidelength):
-        for y in torch.linspace(
+        upscaled_coordinates = torch.zeros(size=(upscaled_sidelength**2, 2))
+        it = 0
+        for x in torch.linspace(
             coordinates.min(), coordinates.max(), upscaled_sidelength
         ):
-            upscaled_coordinates[it] = torch.tensor([x, y])
-            it += 1
+            for y in torch.linspace(
+                coordinates.min(), coordinates.max(), upscaled_sidelength
+            ):
+                upscaled_coordinates[it] = torch.tensor([x, y])
+                it += 1
 
-    model_output = model(upscaled_coordinates)
+        model_output = model(upscaled_coordinates).detach()
 
-    pred_upscaled_fig = go.Figure(
-        data=go.Heatmap(
-            z=model_output.cpu()
-            .view(upscaled_sidelength, upscaled_sidelength)
-            .detach()
-            .numpy(),
-            colorscale="RdBu",
-            zmid=0,
+        pred_upscaled_fig = go.Figure(
+            data=go.Heatmap(
+                z=model_output.cpu()
+                .view(upscaled_sidelength, upscaled_sidelength)
+                .detach()
+                .numpy(),
+                colorscale="RdBu",
+                zmid=0,
+            )
         )
-    )
-    pred_upscaled_fig.update_layout(
-        yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
-    )
+        pred_upscaled_fig.update_layout(
+            yaxis=dict(scaleanchor="x", autorange="reversed"),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
 
     return {
         "pred_upscaled_fig": pred_upscaled_fig,
-        "upscaled_image": model_output.detach(),
+        "upscaled_image": model_output,
         "upscaled_coordinates": upscaled_coordinates,
     }
 
 
-def pixelwise_difference(prediction, ground_truth):
-    sidelength = int(math.sqrt(prediction.shape[0]))
+def pixelwise_difference(prediction, target, shape):
+    if len(shape) == 2:
+        pixelwise_diff_fig = go.Figure()
+    elif len(shape) == 3:
+        sidelength = int(math.sqrt(prediction.shape[0]))
 
-    difference = prediction - ground_truth.view(sidelength**2)
+        difference = prediction - target.view(sidelength**2)
 
-    pixelwise_diff_fig = go.Figure(
-        data=go.Heatmap(
-            z=difference.cpu().view(sidelength, sidelength).detach().numpy(),
-            colorscale="RdBu",
-            zmid=0,
+        pixelwise_diff_fig = go.Figure(
+            data=go.Heatmap(
+                z=difference.cpu().view(sidelength, sidelength).detach().numpy(),
+                colorscale="RdBu",
+                zmid=0,
+            )
         )
-    )
 
-    pixelwise_diff_fig.update_layout(
-        yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
-    )
+        pixelwise_diff_fig.update_layout(
+            yaxis=dict(scaleanchor="x", autorange="reversed"),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
 
     return {"pixelwise_diff_fig": pixelwise_diff_fig}
 
 
-def plot_gradients(model, ground_truth, coordinates):
-    sidelength = int(math.sqrt(coordinates.shape[0]))
-
+def plot_gradients(model, target, coordinates, shape):
     coordinates.requires_grad = True
     prediction = model(coordinates)
 
     # ----------------------------------------------------------------
     # Gradient Prediction
-
+    # same shape as coordinates
     pred_dc = torch.autograd.grad(
         outputs=prediction.sum(),
         inputs=coordinates,
         grad_outputs=None,
         create_graph=True,
-    )[
-        0
-    ]  # same shape as coordinates
+    )[0]
 
-    pred_dc_img = grads2img(
-        pred_dc[..., 0].view(sidelength, sidelength),
-        pred_dc[..., 1].view(sidelength, sidelength),
-        sidelength,
-    )
+    # 1-D case
+    if len(shape) == 2:
+        pred_gradients_fig = go.Figure()
+        pred_laplacian_fig = go.Figure()
+        gt_gradients_fig = go.Figure()
+        gt_laplacian_fig = go.Figure()
+    # 2-D case
+    elif len(shape) == 3:
+        sidelength = int(math.sqrt(coordinates.shape[0]))
+
+        pred_dc_img = grads2img(
+            pred_dc[..., 0].view(sidelength, sidelength),
+            pred_dc[..., 1].view(sidelength, sidelength),
+            sidelength,
+        )
 
         pred_gradients_fig = px.imshow(pred_dc_img)
 
-    # ----------------------------------------------------------------
-    # Laplacian Prediction
+        # ----------------------------------------------------------------
+        # Laplacian Prediction
 
-    pred_dcxdc = torch.autograd.grad(
-        outputs=pred_dc[..., 0].sum(),
-        inputs=coordinates,
-        grad_outputs=None,
-        retain_graph=True,
-    )[0]
-    pred_dcydc = torch.autograd.grad(
-        outputs=pred_dc[..., 1].sum(),
-        inputs=coordinates,
-        grad_outputs=None,
-        retain_graph=True,
-    )[0]
+        pred_dcxdc = torch.autograd.grad(
+            outputs=pred_dc[..., 0].sum(),
+            inputs=coordinates,
+            grad_outputs=None,
+            retain_graph=True,
+        )[0]
+        pred_dcydc = torch.autograd.grad(
+            outputs=pred_dc[..., 1].sum(),
+            inputs=coordinates,
+            grad_outputs=None,
+            retain_graph=True,
+        )[0]
 
-    # select dcxdcx and dcydcy (we do not need dcxdcy and dcydcx)
-    pred_dcdc = torch.stack((pred_dcxdc[..., 0], pred_dcydc[..., 1]), axis=-1)
+        # select dcxdcx and dcydcy (we do not need dcxdcy and dcydcx)
+        pred_dcdc = torch.stack((pred_dcxdc[..., 0], pred_dcydc[..., 1]), axis=-1)
 
-    # calculate the sum so that it acutally becomes the laplace
-    pred_laplace_dcdc = pred_dcdc.sum(dim=-1)
+        # calculate the sum so that it acutally becomes the laplace
+        pred_laplace_dcdc = pred_dcdc.sum(dim=-1)
 
-    pred_laplacian_fig = go.Figure(
-        data=go.Heatmap(
-            z=pred_laplace_dcdc.cpu().view(sidelength, sidelength).detach().numpy(),
-            colorscale="RdBu",
-            zmid=0,
+        pred_laplacian_fig = go.Figure(
+            data=go.Heatmap(
+                z=pred_laplace_dcdc.cpu().view(sidelength, sidelength).detach().numpy(),
+                colorscale="RdBu",
+                zmid=0,
+            )
         )
-    )
 
         pred_laplacian_fig.update_layout(
+            yaxis=dict(scaleanchor="x", autorange="reversed"),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
 
-    # ----------------------------------------------------------------
-    # Gradient Ground Truth
+        # ----------------------------------------------------------------
+        # Gradient Ground Truth
 
-    gt_image = ground_truth.reshape(sidelength, sidelength)
+        gt_image = target.reshape(sidelength, sidelength)
 
-    gt_dcx = scipy.ndimage.sobel(gt_image, axis=0)
-    gt_dcy = scipy.ndimage.sobel(gt_image, axis=1)
+        gt_dcx = scipy.ndimage.sobel(gt_image, axis=0)
+        gt_dcy = scipy.ndimage.sobel(gt_image, axis=1)
 
-    gt_dc_img = grads2img(gt_dcx, gt_dcy, sidelength)
+        gt_dc_img = grads2img(gt_dcx, gt_dcy, sidelength)
 
         gt_gradients_fig = px.imshow(gt_dc_img)
 
-    # ----------------------------------------------------------------
-    # Laplacian Ground Truth
+        # ----------------------------------------------------------------
+        # Laplacian Ground Truth
 
-    gt_laplace_dcdc = scipy.ndimage.laplace(gt_image)
+        gt_laplace_dcdc = scipy.ndimage.laplace(gt_image)
 
-    gt_laplacian_fig = go.Figure(
-        data=go.Heatmap(z=gt_laplace_dcdc, colorscale="RdBu", zmid=0)
-    )
+        gt_laplacian_fig = go.Figure(
+            data=go.Heatmap(z=gt_laplace_dcdc, colorscale="RdBu", zmid=0)
+        )
 
-    gt_laplacian_fig.update_layout(
-        yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
-    )
+        gt_laplacian_fig.update_layout(
+            yaxis=dict(scaleanchor="x", autorange="reversed"),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
 
     else:
-
+        raise ("Unknown dataset type")
     return {
         "pred_gradients_fig": pred_gradients_fig,
         "pred_laplacian_fig": pred_laplacian_fig,
@@ -198,8 +222,10 @@ def grads2img(grads_x, grads_y, sidelength):
     return grads_rgb
 
 
-def calculate_spectrum(values):
-    if len(values.shape) > 1:
+def calculate_spectrum(values, shape):
+    spectrum_abs_fig = go.Figure()
+    spectrum_phase_fig = go.Figure()
+    if len(shape) == 3:
         sidelength = int(math.sqrt(values.shape[0]))
 
         spectrum = torch.fft.fft2(values.view(sidelength, sidelength))
@@ -223,3 +249,9 @@ def calculate_spectrum(values):
 
     elif len(shape) == 2:
         log.warning("Calculation of non-image data not supported yet")
+    else:
+        log.warning("Unknown shape: " + str(shape))
+    return {
+        "spectrum_abs_fig": spectrum_abs_fig,
+        "spectrum_phase_fig": spectrum_phase_fig,
+    }
