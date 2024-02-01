@@ -142,7 +142,7 @@ def minmax_scaler(data, min_norm, max_norm):
 
 def extract_data(dataset):
     return {
-        "coordinates": dataset.coords,
+        "coords": dataset.coords,
         "target": dataset.values,
         "shape": dataset.shape,
     }

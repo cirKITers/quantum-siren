@@ -19,7 +19,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         predict,
         inputs={
             "model": "model",
-            "coordinates": "coordinates",
+            "coords": "coords",
         },
         outputs={"prediction": "prediction"},
     )
@@ -28,14 +28,14 @@ def create_pipeline(**kwargs) -> Pipeline:
         upscaling,
         inputs={
             "model": "model",
-            "coordinates": "coordinates",
+            "coords": "coords",
             "factor": "params:upscale_factor",
             "shape": "shape",
         },
         outputs={
             "pred_upscaled_fig": "pred_upscaled_fig",
             "upscaled_image": "upscaled_image",
-            "upscaled_coordinates": "upscaled_coordinates",
+            "upscaled_coordinates": "upscaled_coords",
         },
     )
 
@@ -50,7 +50,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         inputs={
             "model": "model",
             "target": "target",
-            "coordinates": "coordinates",
+            "coords": "coords",
             "shape": "shape",
         },
         outputs={
@@ -85,7 +85,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
         ],
         inputs={
-            "coordinates": "coordinates",
+            "coords": "coords",
             "model": "model",
             "target": "target",
             "shape": "shape",

@@ -17,35 +17,31 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def predict(model, coordinates):
-    model_output = model(coordinates)
+def predict(model, coords):
+    model_output = model(coords)
 
     return {"prediction": model_output.view(-1).detach()}
 
 
-def upscaling(model, coordinates, factor, shape):
+def upscaling(model, coords, factor, shape):
     # 1-D case
     if len(shape) == 2:
         pred_upscaled_fig = go.Figure()
-        model_output = model(coordinates).detach()
-        upscaled_coordinates = coordinates
+        model_output = model(coords).detach()
+        upscaled_coords = coords
     # 2-D case
     elif len(shape) == 3:
-        sidelength = math.sqrt(coordinates.shape[0])
+        sidelength = math.sqrt(coords.shape[0])
         upscaled_sidelength = int(sidelength * factor)
 
-        upscaled_coordinates = torch.zeros(size=(upscaled_sidelength**2, 2))
+        upscaled_coords = torch.zeros(size=(upscaled_sidelength**2, 2))
         it = 0
-        for x in torch.linspace(
-            coordinates.min(), coordinates.max(), upscaled_sidelength
-        ):
-            for y in torch.linspace(
-                coordinates.min(), coordinates.max(), upscaled_sidelength
-            ):
-                upscaled_coordinates[it] = torch.tensor([x, y])
+        for x in torch.linspace(coords.min(), coords.max(), upscaled_sidelength):
+            for y in torch.linspace(coords.min(), coords.max(), upscaled_sidelength):
+                upscaled_coords[it] = torch.tensor([x, y])
                 it += 1
 
-        model_output = model(upscaled_coordinates).detach()
+        model_output = model(upscaled_coords).detach()
 
         pred_upscaled_fig = go.Figure(
             data=go.Heatmap(
@@ -65,7 +61,7 @@ def upscaling(model, coordinates, factor, shape):
     return {
         "pred_upscaled_fig": pred_upscaled_fig,
         "upscaled_image": model_output,
-        "upscaled_coordinates": upscaled_coordinates,
+        "upscaled_coordinates": upscaled_coords,
     }
 
 
@@ -93,16 +89,16 @@ def pixelwise_difference(prediction, target, shape):
     return {"pixelwise_diff_fig": pixelwise_diff_fig}
 
 
-def plot_gradients(model, target, coordinates, shape):
-    coordinates.requires_grad = True
-    prediction = model(coordinates)
+def plot_gradients(model, target, coords, shape):
+    coords.requires_grad = True
+    pred = model(coords)
 
     # ----------------------------------------------------------------
     # Gradient Prediction
     # same shape as coordinates
     pred_dc = torch.autograd.grad(
-        outputs=prediction.sum(),
-        inputs=coordinates,
+        outputs=pred.sum(),
+        inputs=coords,
         grad_outputs=None,
         create_graph=True,
     )[0]
@@ -210,13 +206,13 @@ def plot_gradients(model, target, coordinates, shape):
 
         pred_dcxdc = torch.autograd.grad(
             outputs=pred_dc[..., 0].sum(),
-            inputs=coordinates,
+            inputs=coords,
             grad_outputs=None,
             retain_graph=True,
         )[0]
         pred_dcydc = torch.autograd.grad(
             outputs=pred_dc[..., 1].sum(),
-            inputs=coordinates,
+            inputs=coords,
             grad_outputs=None,
             retain_graph=True,
         )[0]
@@ -255,10 +251,10 @@ def plot_gradients(model, target, coordinates, shape):
         # ----------------------------------------------------------------
         # Laplacian Ground Truth
 
-        gt_laplace_dcdc = scipy.ndimage.laplace(gt_image)
+        gt_dcdc = scipy.ndimage.laplace(gt_image)
 
         gt_laplacian_fig = go.Figure(
-            data=go.Heatmap(z=gt_laplace_dcdc, colorscale="RdBu", zmid=0)
+            data=go.Heatmap(z=gt_dcdc, colorscale="RdBu", zmid=0)
         )
 
         gt_laplacian_fig.update_layout(

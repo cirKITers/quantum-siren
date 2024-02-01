@@ -45,7 +45,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         inputs={
             "dataset": "dataset",
         },
-        outputs={"coordinates": "coordinates", "target": "target", "shape": "shape"},
+        outputs={"coords": "coords", "target": "target", "shape": "shape"},
     )
 
     return pipeline(
@@ -56,7 +56,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             nd_extract_data,
         ],
         outputs={
-            "coordinates": "coordinates",
+            "coords": "coords",
             "target": "target",
             "shape": "shape",
             "dataloader": "dataloader",
