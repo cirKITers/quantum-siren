@@ -65,8 +65,6 @@ class ImageFitting(Dataset):
         if nonlinear_coords:
             self.coords = (torch.asin(self.coords) + torch.pi / 2) / 2
 
-        # scale the data between -1..1 (yeah, I know that's ugly)
-        # values = 2/(torch.abs(values.max() - values.min())) * (-values.min() + values) - 1
         self.values = minmax_scaler(values, -1, 1)
 
     def __len__(self):
@@ -89,7 +87,8 @@ class CosineFitting(Dataset):
         self.coords = get_mgrid(domain, n_d, dim=1)
 
         # Formula (4) in referenced paper 2309.03279
-        y = lambda x: 1 / torch.linalg.norm(omega_d) * torch.sum(torch.cos(omega_d * x))
+        def y(x):
+            return 1 / torch.linalg.norm(omega_d) * torch.sum(torch.cos(omega_d * x))
 
         self.values = torch.stack([y(x) for x in self.coords])
 
