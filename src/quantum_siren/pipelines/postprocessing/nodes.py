@@ -328,7 +328,24 @@ def calculate_spectrum(values, shape):
         )
 
     elif len(shape) == 2:
-        log.warning("Calculation of non-image data not supported yet")
+        spectrum = torch.fft.fft(values)
+        spectrum = torch.fft.fftshift(spectrum)
+        frequencies = [-len(spectrum) // 2 + i + 1 for i in range(len(spectrum))]
+
+        spectrum_abs_fig = go.Figure(data=go.Bar(y=spectrum.abs()))
+        spectrum_abs_fig.update_layout(
+            plot_bgcolor="rgba(0,0,0,0)",
+            xaxis=dict(
+                tickvals=[i for i in range(len(spectrum))],
+                ticktext=frequencies,
+                tickmode="array",
+            ),
+        )
+
+        spectrum_phase_fig = go.Figure(data=go.Bar(y=spectrum.angle()))
+        spectrum_phase_fig.update_layout(
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
     else:
         log.warning("Unknown shape: " + str(shape))
     return {
