@@ -156,9 +156,6 @@ class Instructor:
             metrics = {}
             loss_val = 0
 
-            preds = []
-            targets = []
-            coords = []
             # Iterate the dataloader
             for coord, target in iter(dataloader):
                 pred = self.model(coord)
@@ -176,18 +173,18 @@ class Instructor:
 
             # Retrieve coordinates, predictions and target for reporting
             coords = dataloader.dataset.coords
-            preds = self.model(coords).cpu().detach()
+            pred = self.model(coords).cpu().detach()
             targets = dataloader.dataset.values
 
             for name, metric in self.metrics.items():
-                mlflow.log_metric(name, metric(preds, targets) / len(dataloader), step)
+                mlflow.log_metric(name, metric(pred, targets) / len(dataloader), step)
 
             # Report figures
             if not step % self.steps_till_summary:
                 if self.sidelength != -1:
                     fig = go.Figure(
                         data=go.Heatmap(
-                            z=preds.view(self.sidelength, self.sidelength),
+                            z=pred.view(self.sidelength, self.sidelength),
                             colorscale="RdBu",
                             zmid=0,
                         )
@@ -201,7 +198,7 @@ class Instructor:
                         data=[
                             go.Scatter(
                                 x=coords.flatten(),
-                                y=preds,
+                                y=pred,
                                 mode="lines",
                                 name="Prediction",
                             ),
