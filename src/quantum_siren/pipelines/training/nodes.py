@@ -175,8 +175,11 @@ class Instructor:
                 self.optim.step()
 
                 loss_val += loss.item()
-            loss_val /= len(dataloader)
 
+            # Debug print to show progress in dev mode
+            log.debug(f"Step {step}:\t Loss: {loss_val / len(dataloader)}")
+
+            # Retrieve coordinates, predictions and target for reporting
             coords = dataloader.dataset.coords
             preds = self.model(coords).cpu().detach()
             targets = dataloader.dataset.values
@@ -184,10 +187,8 @@ class Instructor:
             for name, metric in self.metrics.items():
                 mlflow.log_metric(name, metric(preds, targets) / len(dataloader), step)
 
+            # Report figures
             if not step % self.steps_till_summary:
-                # print(self.params)
-                # print(f"Step {step}:\t Loss: {loss_val.item()}\t SSIM: {ssim_val}")
-
                 if self.sidelength != -1:
                     fig = go.Figure(
                         data=go.Heatmap(
@@ -222,16 +223,9 @@ class Instructor:
                         plot_bgcolor="rgba(0,0,0,0)",
                     )
 
+                # Report this figure directly to mlflow (not via kedro)
+                # to show progress in mlflow dashboard
                 mlflow.log_figure(fig, f"prediction_step_{step}.html")
-                # print(f"Params: {params}")
-                # img_grad = gradient(model_output, coords)
-                # img_laplacian = laplace(model_output, coords)
-
-                # fig, axes = plt.subplots(1,3, figsize=(18,6))
-                # axes[1].imshow(img_grad.norm(dim=-1).cpu().view(sidelength,sidelength).detach().numpy())
-                # axes[2].imshow(img_laplacian.cpu().view(sidelength,sidelength).detach().numpy())
-                # plt.show()
-                log.debug(f"Step {step}:\t Loss: {loss_val}")
 
         return self.model
 
