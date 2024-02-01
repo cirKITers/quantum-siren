@@ -178,7 +178,7 @@ class Instructor:
             loss_val /= len(dataloader)
 
             coords = dataloader.dataset.coords
-            preds = self.model(coords)
+            preds = self.model(coords).cpu().detach()
             targets = dataloader.dataset.values
 
             for name, metric in self.metrics.items():
@@ -191,10 +191,7 @@ class Instructor:
                 if self.sidelength != -1:
                     fig = go.Figure(
                         data=go.Heatmap(
-                            z=preds.cpu()
-                            .view(self.sidelength, self.sidelength)
-                            .detach()
-                            .numpy(),
+                            z=preds.view(self.sidelength, self.sidelength),
                             colorscale="RdBu",
                             zmid=0,
                         )
@@ -207,13 +204,16 @@ class Instructor:
                     fig = go.Figure(
                         data=[
                             go.Scatter(
-                                x=coords,
-                                y=preds.cpu().detach().numpy(),
+                                x=coords.flatten(),
+                                y=preds,
                                 mode="lines",
                                 name="Prediction",
                             ),
                             go.Scatter(
-                                x=coords, y=targets, mode="lines", name="Target"
+                                x=coords.flatten(),
+                                y=targets,
+                                mode="lines",
+                                name="Target",
                             ),
                         ]
                     )

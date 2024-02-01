@@ -58,7 +58,7 @@ class ImageFitting(Dataset):
         self.sidelength = sidelength
         self.shape = (sidelength, sidelength, 1)
         img = get_cameraman_tensor(sidelength)
-        values = img.permute(1, 2, 0).view(-1, 1)
+        values = img.permute(1, 2, 0).view(-1)
         self.coords = get_mgrid(domain, sidelength, 2)
 
         # scale the model input between 0..pi
@@ -91,7 +91,7 @@ class CosineFitting(Dataset):
         # Formula (4) in referenced paper 2309.03279
         y = lambda x: 1 / torch.linalg.norm(omega_d) * torch.sum(torch.cos(omega_d * x))
 
-        self.values = torch.stack([y(x) for x in self.coords]).reshape(-1, 1)
+        self.values = torch.stack([y(x) for x in self.coords])
 
     def __len__(self):
         assert len(self.coords) == len(self.values)
