@@ -4,6 +4,7 @@ generated using Kedro 0.18.12
 """
 import torch
 from torchmetrics.image import StructuralSimilarityIndexMeasure, PeakSignalNoiseRatio
+from torch.utils.data import DataLoader
 
 import plotly.graph_objects as go
 
@@ -95,7 +96,7 @@ class Instructor:
     def cost(self, *args):
         return self.loss(*args) * self.loss_sign
 
-    def fft_ssim(self, pred, target):
+    def fft_ssim(self, pred: torch.tensor, target: torch.tensor):
         if self.sidelength == -1:
             return -1
         pred_spectrum = torch.fft.fft2(pred.view(self.sidelength, self.sidelength))
@@ -113,7 +114,7 @@ class Instructor:
             val_abs + val_phase
         ) / 2  # because we want to match phase and amplitude but keep the result <=1
 
-    def ssim(self, pred, target):
+    def ssim(self, pred: torch.tensor, target: torch.tensor):
         if self.sidelength == -1:
             return -1
         ssim = StructuralSimilarityIndexMeasure(data_range=1.0)
@@ -124,7 +125,7 @@ class Instructor:
 
         return val
 
-    def psnr(self, pred, target):
+    def psnr(self, pred: torch.tensor, target: torch.tensor):
         if self.sidelength == -1:
             return -1
         psnr = PeakSignalNoiseRatio(data_range=1.0)
@@ -140,7 +141,7 @@ class Instructor:
 
         return val
 
-    def set_sidelength(self, dataloader):
+    def set_sidelength(self, dataloader: DataLoader):
         if len(dataloader.dataset.shape) == 3:
             self.sidelength = dataloader.dataset.sidelength
         elif len(dataloader.dataset.shape) == 2:
@@ -148,7 +149,7 @@ class Instructor:
         else:
             raise ValueError(f"Unsupported shape {dataloader.dataset.shape}")
 
-    def train(self, dataloader, steps):
+    def train(self, dataloader: DataLoader, steps: int):
         self.set_sidelength(dataloader)
 
         for step in range(steps):
