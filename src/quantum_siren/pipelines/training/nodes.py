@@ -141,10 +141,12 @@ class Instructor:
         return val
 
     def set_sidelength(self, dataloader):
-        if hasattr(dataloader.dataset, "sidelength"):
+        if len(dataloader.dataset.shape) == 3:
             self.sidelength = dataloader.dataset.sidelength
-        else:
+        elif len(dataloader.dataset.shape) == 2:
             self.sidelength = -1
+        else:
+            raise ValueError(f"Unsupported shape {dataloader.dataset.shape}")
 
     def train(self, dataloader, steps):
         self.set_sidelength(dataloader)
