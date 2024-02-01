@@ -109,13 +109,93 @@ def plot_gradients(model, target, coordinates, shape):
 
     # 1-D case
     if len(shape) == 2:
-        pred_gradients_fig = go.Figure()
-        pred_laplacian_fig = go.Figure()
-        gt_gradients_fig = go.Figure()
-        gt_laplacian_fig = go.Figure()
+        # ----------------------------------------------------------------
+        # Gradient Prediction
+
+        pred_gradients_fig = go.Figure(
+            data=[
+                go.Scatter(
+                    x=coords.detach().flatten(),
+                    y=pred.detach(),
+                    mode="lines",
+                    name="Prediction",
+                ),
+            ]
+        )
+        pred_gradients_fig.update_layout(
+            yaxis=dict(range=[-1.1, 1.1]),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+
+        # ----------------------------------------------------------------
+        # Laplacian Prediction
+
+        pred_dcdc = torch.autograd.grad(
+            outputs=pred_dc.sum(),
+            inputs=coords,
+            grad_outputs=None,
+            create_graph=True,
+        )[0]
+
+        pred_laplacian_fig = go.Figure(
+            data=[
+                go.Scatter(
+                    x=coords.detach().flatten(),
+                    y=pred_dcdc.detach().flatten(),
+                    mode="lines",
+                    name="Prediction",
+                ),
+            ]
+        )
+        pred_laplacian_fig.update_layout(
+            yaxis=dict(range=[-1.1, 1.1]),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+
+        # ----------------------------------------------------------------
+        # Gradient Ground Truth
+
+        gt_dc = scipy.ndimage.sobel(target)
+
+        gt_gradients_fig = go.Figure(
+            data=[
+                go.Scatter(
+                    x=coords.detach().flatten(),
+                    y=gt_dc,
+                    mode="lines",
+                    name="Prediction",
+                ),
+            ]
+        )
+        gt_gradients_fig.update_layout(
+            yaxis=dict(range=[-1.1, 1.1]),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+
+        # ----------------------------------------------------------------
+        # Laplacian Ground Truth
+
+        gt_dcdc = scipy.ndimage.laplace(target)
+
+        gt_laplacian_fig = go.Figure(
+            data=[
+                go.Scatter(
+                    x=coords.detach().flatten(),
+                    y=gt_dcdc,
+                    mode="lines",
+                    name="Prediction",
+                ),
+            ]
+        )
+        gt_laplacian_fig.update_layout(
+            yaxis=dict(range=[-1.1, 1.1]),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
     # 2-D case
     elif len(shape) == 3:
-        sidelength = int(math.sqrt(coordinates.shape[0]))
+        # ----------------------------------------------------------------
+        # Gradient Prediction
+        sidelength = int(math.sqrt(coords.shape[0]))
 
         pred_dc_img = grads2img(
             pred_dc[..., 0].view(sidelength, sidelength),
