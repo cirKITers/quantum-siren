@@ -163,12 +163,6 @@ class Instructor:
             for coord, target in iter(dataloader):
                 pred = self.model(coord)
 
-                # # Idea is to create predictions, target and input independent
-                # # of the actual data and batch size, which allows reshaping them later
-                # preds = [*preds, *pred.flatten()]
-                # targets = [*targets, *target.flatten()]
-                # coords = [*coords, *coord.flatten()]
-
                 loss = self.cost(pred, target)
 
                 self.optim.zero_grad()
