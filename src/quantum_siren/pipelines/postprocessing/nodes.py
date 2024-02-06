@@ -97,9 +97,9 @@ def plot_gradients(model, target, coords, shape):
     # Gradient Prediction
     # same shape as coordinates
     pred_dc = torch.autograd.grad(
-        outputs=pred.sum(),
-        inputs=coords,
-        grad_outputs=None,
+        outputs=pred,
+        inputs=[coords],
+        grad_outputs=torch.ones_like(pred),
         create_graph=True,
     )[0]
 
@@ -126,9 +126,9 @@ def plot_gradients(model, target, coords, shape):
         # Laplacian Prediction
 
         pred_dcdc = torch.autograd.grad(
-            outputs=pred_dc.sum(),
-            inputs=coords,
-            grad_outputs=None,
+            outputs=pred_dc,
+            inputs=[coords],
+            grad_outputs=torch.ones_like(pred_dc),
             create_graph=True,
         )[0]
 
@@ -162,7 +162,6 @@ def plot_gradients(model, target, coords, shape):
             ]
         )
         gt_gradients_fig.update_layout(
-            yaxis=dict(range=[-1.1, 1.1]),
             plot_bgcolor="rgba(0,0,0,0)",
         )
 
@@ -182,7 +181,6 @@ def plot_gradients(model, target, coords, shape):
             ]
         )
         gt_laplacian_fig.update_layout(
-            yaxis=dict(range=[-1.1, 1.1]),
             plot_bgcolor="rgba(0,0,0,0)",
         )
     # 2-D case
@@ -203,15 +201,15 @@ def plot_gradients(model, target, coords, shape):
         # Laplacian Prediction
 
         pred_dcxdc = torch.autograd.grad(
-            outputs=pred_dc[..., 0].sum(),
-            inputs=coords,
-            grad_outputs=None,
+            outputs=pred_dc[..., 0],
+            inputs=[coords],
+            grad_outputs=torch.ones_like(pred_dc[..., 0]),
             retain_graph=True,
         )[0]
         pred_dcydc = torch.autograd.grad(
-            outputs=pred_dc[..., 1].sum(),
-            inputs=coords,
-            grad_outputs=None,
+            outputs=pred_dc[..., 1],
+            inputs=[coords],
+            grad_outputs=torch.ones_like(pred_dc[..., 1]),
             retain_graph=True,
         )[0]
 
