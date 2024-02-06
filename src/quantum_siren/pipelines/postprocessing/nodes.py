@@ -119,7 +119,6 @@ def plot_gradients(model, target, coords, shape):
             ]
         )
         pred_gradients_fig.update_layout(
-            yaxis=dict(range=[-1.1, 1.1]),
             plot_bgcolor="rgba(0,0,0,0)",
         )
 
@@ -144,7 +143,6 @@ def plot_gradients(model, target, coords, shape):
             ]
         )
         pred_laplacian_fig.update_layout(
-            yaxis=dict(range=[-1.1, 1.1]),
             plot_bgcolor="rgba(0,0,0,0)",
         )
 
