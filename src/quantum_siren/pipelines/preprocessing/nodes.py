@@ -2,6 +2,7 @@
 This is a boilerplate pipeline 'preprocessing'
 generated using Kedro 0.18.12
 """
+
 import torch
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader, Dataset
@@ -9,8 +10,6 @@ from torch.utils.data import DataLoader, Dataset
 from PIL import Image
 from torchvision.transforms import Resize, Compose, ToTensor, Normalize
 import skimage
-
-import math
 
 import plotly.graph_objects as go
 

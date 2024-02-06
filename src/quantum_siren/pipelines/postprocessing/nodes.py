@@ -3,9 +3,7 @@ This is a boilerplate pipeline 'postprocessing'
 generated using Kedro 0.18.12
 """
 
-from skimage.transform import rescale
 import torch
-import mlflow
 import plotly.graph_objects as go
 import math
 import scipy
