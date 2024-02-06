@@ -108,7 +108,7 @@ def plot_gradients(model, target, coords, shape):
         # ----------------------------------------------------------------
         # Gradient Prediction
 
-        pred_gradients_fig = go.Figure(
+        pred_gradient_fig = go.Figure(
             data=[
                 go.Scatter(
                     x=coords.detach().flatten(),
@@ -118,7 +118,7 @@ def plot_gradients(model, target, coords, shape):
                 ),
             ]
         )
-        pred_gradients_fig.update_layout(
+        pred_gradient_fig.update_layout(
             plot_bgcolor="rgba(0,0,0,0)",
         )
 
@@ -151,7 +151,7 @@ def plot_gradients(model, target, coords, shape):
 
         gt_dc = scipy.ndimage.sobel(target)
 
-        gt_gradients_fig = go.Figure(
+        gt_gradient_fig = go.Figure(
             data=[
                 go.Scatter(
                     x=coords.detach().flatten(),
@@ -161,7 +161,7 @@ def plot_gradients(model, target, coords, shape):
                 ),
             ]
         )
-        gt_gradients_fig.update_layout(
+        gt_gradient_fig.update_layout(
             plot_bgcolor="rgba(0,0,0,0)",
         )
 
@@ -195,7 +195,7 @@ def plot_gradients(model, target, coords, shape):
             sidelength,
         )
 
-        pred_gradients_fig = px.imshow(pred_dc_img)
+        pred_gradient_fig = px.imshow(pred_dc_img)
 
         # ----------------------------------------------------------------
         # Laplacian Prediction
@@ -242,7 +242,7 @@ def plot_gradients(model, target, coords, shape):
 
         gt_dc_img = grads2img(gt_dcx, gt_dcy, sidelength)
 
-        gt_gradients_fig = px.imshow(gt_dc_img)
+        gt_gradient_fig = px.imshow(gt_dc_img)
 
         # ----------------------------------------------------------------
         # Laplacian Ground Truth
@@ -261,9 +261,9 @@ def plot_gradients(model, target, coords, shape):
     else:
         raise ("Unknown dataset type")
     return {
-        "pred_gradients_fig": pred_gradients_fig,
+        "pred_gradient_fig": pred_gradient_fig,
         "pred_laplacian_fig": pred_laplacian_fig,
-        "gt_gradients_fig": gt_gradients_fig,
+        "gt_gradient_fig": gt_gradient_fig,
         "gt_laplacian_fig": gt_laplacian_fig,
     }
 

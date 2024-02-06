@@ -54,9 +54,9 @@ def create_pipeline(**kwargs) -> Pipeline:
             "shape": "shape",
         },
         outputs={
-            "pred_gradients_fig": "pred_gradients_fig",
+            "pred_gradient_fig": "pred_gradient_fig",
             "pred_laplacian_fig": "pred_laplacian_fig",
-            "gt_gradients_fig": "gt_gradients_fig",
+            "gt_gradient_fig": "gt_gradient_fig",
             "gt_laplacian_fig": "gt_laplacian_fig",
         },
     )
