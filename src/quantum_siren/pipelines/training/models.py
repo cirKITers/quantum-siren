@@ -27,14 +27,17 @@ class Model(torch.nn.Module):
 
         self.shots = None if shots == "None" else shots
         self.n_qubits = n_qubits
-        self.n_layers = n_layers
+        # Following the ideas from https://doi.org/10.48550/arXiv.2008.08605
+        # we add an additional layer to "sourround" our encoding
+        self.n_layers = n_layers  # number of "visible" layers
+        self._n_layers_p1 = n_layers + 1  # number of actual layers for weight init etc.
 
         self.iec = getattr(ansaetze, iec_ansatz, ansaetze.nothing)
         self.vqc = getattr(ansaetze, vqc_ansatz, ansaetze.nothing)
 
         if output_interpretation != "all":
             output_interpretation = int(output_interpretation)
-            assert output_interpretation < n_qubits, (
+            assert output_interpretation < self.n_qubits, (
                 f"Output interpretation parameter {output_interpretation} "
                 "can either be a qubit (integer smaller n_qubits) or 'all'"
             )
@@ -48,12 +51,12 @@ class Model(torch.nn.Module):
         self.qnode = qml.QNode(self.circuit, dev, interface="torch")
         self.qlayer = qml.qnn.TorchLayer(
             self.qnode,
-            {"weights": [n_layers, n_qubits, self.vqc(None)]},
+            {"weights": [self._n_layers_p1, n_qubits, self.vqc(None)]},
         )
 
         self.initialize_params(
             n_qubits=self.n_qubits,
-            n_layers=self.n_layers,
+            n_layers=self._n_layers_p1,
             n_gates_per_layer=self.vqc(None),
         )
 
@@ -72,15 +75,16 @@ class Model(torch.nn.Module):
         if self.data_reupload != 0:
             dru[:: int(1 / self.data_reupload)] = 1
 
-        for l, l_params in enumerate(weights):
-            if l == 0 or dru[l] == 1:
+        # when iterating weights, the first dim. is the layer, the second is qubits
+        for layer, layer_params in enumerate(weights[:-2]):  # N of (N+1) layers
+            self.vqc(layer_params)
+            qml.Barrier()
+            if layer == 0 or dru[layer] == 1:
                 self.iec(
                     torch.stack([inputs] * self.n_qubits),
                 )  # half because the coordinates already have 2 dims
 
-            self.vqc(l_params)
-
-            qml.Barrier()
+        self.vqc(weights[-1])  # the N+1 layer
 
         return [qml.expval(qml.PauliZ(i)) for i in range(self.n_qubits)]
 
