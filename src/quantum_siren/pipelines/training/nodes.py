@@ -37,6 +37,7 @@ class Instructor:
         output_interpretation,
         loss,
         seed,
+        max_workers,
     ) -> None:
         # this sets a global seed, that, according to documentation, affects the
         # weight initialization and dataloader
@@ -52,6 +53,7 @@ class Instructor:
             n_layers,
             data_reupload,
             output_interpretation,
+            max_workers,
         )
 
         if optimizer == "QNG":
@@ -261,6 +263,7 @@ def training(
     dataloader,
     steps,
     seed,
+    max_workers,
 ):
     instructor = Instructor(
         n_layers,
@@ -275,6 +278,7 @@ def training(
         output_interpretation,
         loss,
         seed,
+        max_workers,
     )
 
     model = instructor.train(dataloader, steps)
