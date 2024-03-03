@@ -110,7 +110,7 @@ def plot_gradients(model, target, coords, shape):
             data=[
                 go.Scatter(
                     x=coords.detach().flatten(),
-                    y=pred_dc.detach(),
+                    y=pred_dc.detach().flatten(),
                     mode="lines",
                     name="Prediction",
                 ),
