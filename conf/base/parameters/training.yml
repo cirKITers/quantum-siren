@@ -18,3 +18,4 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   loss: "mse" #mse, fft_ssim, ssim, psnr
   output_interpretation: 0 # 0 to use all qubits or a specific qubit number
   seed: 1111
+  max_workers: "None"
