@@ -33,6 +33,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             "dataloader": "dataloader",
             "steps": "params:steps",
             "seed": "params:seed",
+            "max_workers": "params:max_workers",
         },
         outputs={"model": "model"},
     )

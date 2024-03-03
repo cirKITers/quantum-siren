@@ -20,12 +20,14 @@ class Model(torch.nn.Module):
         n_layers,
         data_reupload,
         output_interpretation,
+        max_workers,
     ) -> None:
         super().__init__()
 
         log.info(f"Creating Model with {n_qubits} Qubits, {n_layers} Layers.")
 
         self.shots = None if shots == "None" else shots
+        self.max_workers = None if max_workers == "None" else max_workers
         self.n_qubits = n_qubits
         # Following the ideas from https://doi.org/10.48550/arXiv.2008.08605
         # we add an additional layer to "sourround" our encoding
@@ -46,7 +48,12 @@ class Model(torch.nn.Module):
 
         self.data_reupload = data_reupload
 
-        dev = qml.device("default.qubit", wires=self.n_qubits, shots=self.shots)
+        dev = qml.device(
+            "default.qubit",
+            wires=self.n_qubits,
+            shots=self.shots,
+            max_workers=self.max_workers,
+        )
 
         self.qnode = qml.QNode(self.circuit, dev, interface="torch")
         self.qlayer = qml.qnn.TorchLayer(
