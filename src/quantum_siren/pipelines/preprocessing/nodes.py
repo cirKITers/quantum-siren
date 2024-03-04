@@ -36,11 +36,20 @@ def get_cameraman_tensor(sidelength):
 
 def get_mgrid(domain, samples, dim=2):
     """
-    Code from https://doi.org/10.48550/arXiv.2006.09661
+    Generates a flattened grid of (x,y,...) coordinates in a range of -1 to 1.
+
+    Parameters
+    ----------
+    sidelen : int
+        Side length of the grid
+    dim : int, optional
+        Dimensionality of the grid, by default 2
+
+    Returns
+    -------
+    torch.Tensor
+        Grid tensor of shape (sidelen^dim, dim)
     """
-    """Generates a flattened grid of (x,y,...) coordinates in a range of -1 to 1.
-    sidelen: int
-    dim: int"""
     tensors = tuple(dim * [torch.linspace(domain[0], domain[1], steps=samples)])
     mgrid = torch.stack(torch.meshgrid(*tensors), dim=-1)
     mgrid = mgrid.reshape(-1, dim)

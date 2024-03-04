@@ -2,6 +2,7 @@
 This is a boilerplate pipeline 'training'
 generated using Kedro 0.18.12
 """
+
 import torch
 from torchmetrics.image import StructuralSimilarityIndexMeasure, PeakSignalNoiseRatio
 from torch.utils.data import DataLoader
@@ -14,6 +15,8 @@ import logging
 from .models import Model
 from .optimizer import QNG, Adam
 
+from typing import Dict
+
 optimizers = {
     "QNG": QNG,
     "Adam": Adam,
@@ -25,20 +28,41 @@ log = logging.getLogger(__name__)
 class Instructor:
     def __init__(
         self,
-        n_layers,
-        n_qubits,
-        vqc_ansatz,
-        iec_ansatz,
-        data_reupload,
-        learning_rate,
-        shots,
-        report_figure_every_n_steps,
-        optimizer,
-        output_interpretation,
-        loss,
-        seed,
-        max_workers,
+        n_layers: int,
+        n_qubits: int,
+        vqc_ansatz: str,
+        iec_ansatz: str,
+        data_reupload: bool,
+        learning_rate: float,
+        shots: int,
+        report_figure_every_n_steps: int,
+        optimizer: str,
+        output_interpretation: str,
+        loss: str,
+        seed: int,
+        max_workers: int,
     ) -> None:
+        """
+        Initializes the object with the given parameters.
+
+        Args:
+            n_layers (int): Number of layers.
+            n_qubits (int): Number of qubits.
+            vqc_ansatz (str): VQC ansatz.
+            iec_ansatz (str): IEC ansatz.
+            data_reupload (bool): Flag for data reupload.
+            learning_rate (float): Learning rate.
+            shots (int): Number of shots.
+            report_figure_every_n_steps (int): Number of steps till summary.
+            optimizer (str): Optimizer type.
+            output_interpretation (str): Output interpretation.
+            loss (str): Loss type.
+            seed (int): Random seed.
+            max_workers (int): Maximum number of workers.
+
+        Returns:
+            None
+        """
         # this sets a global seed, that, according to documentation, affects the
         # weight initialization and dataloader
         torch.manual_seed(seed)
@@ -95,10 +119,21 @@ class Instructor:
 
         # del self.metrics[loss]
 
-    def cost(self, *args):
+    def cost(self, *args: any) -> float:
         return self.loss(*args) * self.loss_sign
 
-    def fft_ssim(self, pred: torch.tensor, target: torch.tensor):
+    def fft_ssim(self, pred: torch.Tensor, target: torch.Tensor):
+        """
+        Calculate the Structural Similarity Index (SSIM) between the predicted
+        and target tensors using the Fast Fourier Transform (FFT) method.
+
+        Args:
+            pred (torch.Tensor): The predicted tensor.
+            target (torch.Tensor): The target tensor.
+
+        Returns:
+            torch.Tensor: The SSIM value between the predicted and target tensors.
+        """
         if self.sidelength == -1:
             return -1
         pred_spectrum = torch.fft.fft2(pred.view(self.sidelength, self.sidelength))
@@ -116,7 +151,18 @@ class Instructor:
             val_abs + val_phase
         ) / 2  # because we want to match phase and amplitude but keep the result <=1
 
-    def ssim(self, pred: torch.tensor, target: torch.tensor):
+    def ssim(self, pred: torch.Tensor, target: torch.Tensor):
+        """
+        Calculate the Structural Similarity Index (SSIM) between the
+        predicted and target tensors.
+
+        Args:
+            pred (torch.Tensor): The predicted tensor.
+            target (torch.Tensor): The target tensor.
+
+        Returns:
+            float: The calculated Structural Similarity Index (SSIM) value.
+        """
         if self.sidelength == -1:
             return -1
         ssim = StructuralSimilarityIndexMeasure(data_range=1.0)
@@ -127,7 +173,18 @@ class Instructor:
 
         return val
 
-    def psnr(self, pred: torch.tensor, target: torch.tensor):
+    def psnr(self, pred: torch.Tensor, target: torch.Tensor):
+        """
+        Calculate the Peak Signal-to-Noise Ratio (PSNR) between the
+        predicted and target tensors.
+
+        Args:
+            pred (torch.Tensor): The predicted tensor.
+            target (torch.Tensor): The target tensor.
+
+        Returns:
+            float: The PSNR value.
+        """
         if self.sidelength == -1:
             return -1
         psnr = PeakSignalNoiseRatio(data_range=1.0)
@@ -138,7 +195,18 @@ class Instructor:
 
         return val
 
-    def mse(self, pred, target):
+    def mse(self, pred: torch.Tensor, target: torch.Tensor):
+        """
+            Calculate the mean squared error (MSE) between the
+        predicted tensor and the target tensor.
+
+            Args:
+                pred (torch.Tensor): The predicted tensor.
+                target (torch.Tensor): The target tensor.
+
+            Returns:
+                torch.Tensor: The mean squared error value.
+        """
         val = ((pred - target) ** 2).mean()
 
         return val
@@ -152,6 +220,17 @@ class Instructor:
             raise ValueError(f"Unsupported shape {dataloader.dataset.shape}")
 
     def train(self, dataloader: DataLoader, steps: int):
+        """
+        Trains the model using the given input and ground truth data
+        for the specified number of steps.
+
+        Args:
+            dataloader (torch.utils.data.DataLoader): The input data.
+            steps (int): The number of steps to train the model.
+
+        Returns:
+            torch.nn.Module: The trained model.
+        """
         self.set_sidelength(dataloader)
 
         for step in range(steps):
@@ -225,15 +304,15 @@ class Instructor:
 
 
 def generate_instructor(
-    n_layers,
-    n_qubits,
-    vqc_ansatz,
-    iec_ansatz,
-    data_reupload,
-    learning_rate,
-    shots,
-    report_figure_every_n_steps,
-):
+    n_layers: int,
+    n_qubits: int,
+    vqc_ansatz: str,
+    iec_ansatz: str,
+    data_reupload: bool,
+    learning_rate: float,
+    shots: int,
+    report_figure_every_n_steps: int,
+) -> Dict[str, Instructor]:
     instructor = Instructor(
         n_layers,
         n_qubits,
@@ -249,22 +328,46 @@ def generate_instructor(
 
 
 def training(
-    n_layers,
-    n_qubits,
-    vqc_ansatz,
-    iec_ansatz,
-    data_reupload,
-    learning_rate,
-    shots,
-    report_figure_every_n_steps,
-    optimizer,
-    output_interpretation,
-    loss,
+    n_layers: int,
+    n_qubits: int,
+    vqc_ansatz: str,
+    iec_ansatz: str,
+    data_reupload: bool,
+    learning_rate: float,
+    shots: int,
+    report_figure_every_n_steps: int,
+    optimizer: str,
+    output_interpretation: int,
+    loss: str,
     dataloader,
-    steps,
-    seed,
-    max_workers,
+    steps: int,
+    seed: int,
+    max_workers: int,
 ):
+    """
+    A function to train a model using an instructor,
+    log the model to MlFlow, and return the trained model.
+
+    Parameters:
+        n_layers (int): Number of layers
+        n_qubits (int): Number of qubits
+        vqc_ansatz (str): VQC ansatz
+        iec_ansatz (str): IEC ansatz
+        data_reupload (bool): Data reupload flag
+        learning_rate (float): Learning rate
+        shots (int): Number of shots
+        report_figure_every_n_steps (int): Report figure every n steps
+        optimizer (str): Optimizer type
+        output_interpretation (int): Output interpretation
+        loss (str): Loss function
+        dataloader (torch.utils.data.DataLoader): The input data
+        steps (int): Number of training steps
+        seed (int): Random seed
+        max_workers (int): Maximum number of workers
+
+    Returns:
+        dict: A dictionary containing the trained model
+    """
     instructor = Instructor(
         n_layers,
         n_qubits,
