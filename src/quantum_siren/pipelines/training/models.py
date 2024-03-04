@@ -4,26 +4,53 @@ import torch
 
 from .ansaetze import ansaetze
 
-import mlflow
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class Model(torch.nn.Module):
     # class Module(torch.nn.Module):
     def __init__(
-        self, n_qubits, shots, vqc_ansatz, iec_ansatz, n_layers, data_reupload
+        self,
+        n_qubits: int,
+        shots: int,
+        vqc_ansatz: str,
+        iec_ansatz: str,
+        n_layers: int,
+        data_reupload: bool,
+        output_interpretation: int,
+        max_workers,
     ) -> None:
         super().__init__()
 
+        log.info(f"Creating Model with {n_qubits} Qubits, {n_layers} Layers.")
+
         self.shots = None if shots == "None" else shots
+        self.max_workers = None if max_workers == "None" else max_workers
         self.n_qubits = n_qubits
         self.n_layers = n_layers
 
         self.iec = getattr(ansaetze, iec_ansatz, ansaetze.nothing)
         self.vqc = getattr(ansaetze, vqc_ansatz, ansaetze.nothing)
 
+        if output_interpretation > 0:
+            output_interpretation = output_interpretation
+            assert output_interpretation < n_qubits, (
+                f"Output interpretation parameter {output_interpretation} "
+                "can either be a qubit (integer smaller n_qubits) or 'all'"
+            )
+
+        self.output_interpretation = output_interpretation
+
         self.data_reupload = data_reupload
 
-        dev = qml.device("default.qubit", wires=self.n_qubits, shots=self.shots)
+        dev = qml.device(
+            "default.qubit",
+            wires=self.n_qubits,
+            shots=self.shots,
+            max_workers=self.max_workers,
+        )
 
         self.qnode = qml.QNode(self.circuit, dev, interface="torch")
         self.qlayer = qml.qnn.TorchLayer(
@@ -49,16 +76,18 @@ class Model(torch.nn.Module):
             self._inputs = inputs
 
         dru = torch.zeros(len(weights))
-        dru[:: int(1 / self.data_reupload)] = 1
+        if self.data_reupload != 0:
+            dru[:: int(1 / self.data_reupload)] = 1
 
         for l, l_params in enumerate(weights):
             if l == 0 or dru[l] == 1:
                 self.iec(
-                    torch.stack([inputs] * (self.n_qubits // 2)),
-                    limit=self.n_qubits - (l // 2),
+                    torch.stack([inputs] * self.n_qubits),
                 )  # half because the coordinates already have 2 dims
 
             self.vqc(l_params)
+
+            qml.Barrier()
 
         return [qml.expval(qml.PauliZ(i)) for i in range(self.n_qubits)]
 
@@ -81,8 +110,10 @@ class Model(torch.nn.Module):
             #     out = pool.starmap(self.qnode, [[params, coord] for coord in model_input])
 
             for i, coord in enumerate(model_input):
-                # out[i] = torch.mean(torch.stack(circuit(params, coord)), axis=0)
-                out[i] = self.qlayer(coord)[-1]
+                if self.output_interpretation > 0:
+                    out[i] = self.qlayer(coord)[self.output_interpretation]
+                else:
+                    out[i] = torch.mean(self.qlayer(coord), axis=0)
         else:
             out = self.qlayer(model_input)[-1]
 
