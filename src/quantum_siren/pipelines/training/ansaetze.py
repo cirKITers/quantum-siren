@@ -78,8 +78,9 @@ class ansaetze:
             Expects form to be [n_qubits, 2]
         """
         for qubit, qubit_params in enumerate(params):
-            qml.RX(qubit_params[0], wires=qubit)
-            qml.RY(qubit_params[1], wires=qubit)
+            qml.RX(qubit_params[:, 0], wires=qubit)
+            if qubit_params.shape[1] > 1:
+                qml.RY(qubit_params[:, 1], wires=qubit)
 
     @staticmethod
     def spread_layers(params: torch.Tensor | np.ndarray):
@@ -97,4 +98,5 @@ class ansaetze:
             if 2 * qubit + 1 > params.shape[0] - 1:
                 break
             qml.RY(qubit_params[0], wires=2 * qubit)
-            qml.RY(qubit_params[1], wires=2 * qubit + 1)
+            if qubit_params.shape[1] > 1:
+                qml.RY(qubit_params[1], wires=2 * qubit + 1)
