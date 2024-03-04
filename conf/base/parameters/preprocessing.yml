@@ -7,7 +7,7 @@
 preprocessing:
   batch_size: 10
   mode: "image" # image, cosine
-  domain: [-1,1] # domain of x values
+  domain: [0,1] # domain of x values
   scale_domain_by_pi: True
 
   # 'image' mode parameter
