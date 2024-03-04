@@ -68,10 +68,12 @@ class ansaetze:
 
     @staticmethod
     def default(params: torch.tensor | np.ndarray):
-        """Encoding of two dimensional data using RX and RY gates. The input is repeated across all qubits (vertically), as specified by the shape of the input.
+        """Encoding of two dimensional data using RX and RY gates.
+        The input is repeated across all qubits (vertically), as specified by the shape of the input.
 
         Args:
-            params (torch.tensor | np.ndarray): Input data with the first value parameterizing the RX gate and the second value parameterizing the RY gate. Expects form to be [n_qubits, 2]
+            params (torch.tensor | np.ndarray): Input data with the first value parameterizing the RX gate
+            and the second value parameterizing the RY gate. Expects form to be [n_qubits, 2]
         """
         for qubit, params in enumerate(params):
             qml.RX(params[0], wires=qubit)
@@ -79,10 +81,12 @@ class ansaetze:
 
     @staticmethod
     def spread_layers(params: torch.tensor | np.ndarray):
-        """Encoding of two dimensional data using RY gates interleaving across the qubits. Here, the first qubits takes the first parameter, the second the second, the third one the first again and so on.
+        """Encoding of two dimensional data using RY gates interleaving across the qubits.
+        Here, the first qubits takes the first parameter, the second the second, the third one the first again and so on.
 
         Args:
-            params (torch.tensor | np.ndarray): Input data with the first value parameterizing the RX gate and the second value parameterizing the RY gate. Expects form to be [n_qubits, 2]
+            params (torch.tensor | np.ndarray): Input data with the first value parameterizing the RX gate
+            and the second value parameterizing the RY gate. Expects form to be [n_qubits, 2]
         """
         for qubit, params in enumerate(params):
             if 2 * qubit + 1 > params.shape[0] - 1:
