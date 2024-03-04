@@ -83,7 +83,7 @@ class Model(torch.nn.Module):
             dru[:: int(1 / self.data_reupload)] = 1
 
         # when iterating weights, the first dim. is the layer, the second is qubits
-        for layer, layer_params in enumerate(weights[:-2]):  # N of (N+1) layers
+        for layer, layer_params in enumerate(weights[:-1]):  # N of (N+1) layers
             self.vqc(layer_params)
             qml.Barrier()
             if layer == 0 or dru[layer] == 1:
