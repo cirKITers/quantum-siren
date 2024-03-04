@@ -75,7 +75,9 @@ class ansaetze:
         Args:
             params (torch.Tensor | np.ndarray): Input data with the first value
             parameterizing the RX gate and the second value parameterizing the RY gate.
-            Expects form to be [n_qubits, 3]
+            Expects form to be [n_qubits, n_gates_per_layer],
+            where n_gates_per_layer=3 in this case.
+            If None, then the number of required params per layer is returned.
         """
         if params is None:
             return 3
