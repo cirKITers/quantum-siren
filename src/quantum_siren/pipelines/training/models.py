@@ -13,13 +13,13 @@ class Model(torch.nn.Module):
     # class Module(torch.nn.Module):
     def __init__(
         self,
-        n_qubits,
-        shots,
-        vqc_ansatz,
-        iec_ansatz,
-        n_layers,
-        data_reupload,
-        output_interpretation,
+        n_qubits: int,
+        shots: int,
+        vqc_ansatz: str,
+        iec_ansatz: str,
+        n_layers: int,
+        data_reupload: bool,
+        output_interpretation: int,
         max_workers,
     ) -> None:
         super().__init__()
@@ -34,8 +34,8 @@ class Model(torch.nn.Module):
         self.iec = getattr(ansaetze, iec_ansatz, ansaetze.nothing)
         self.vqc = getattr(ansaetze, vqc_ansatz, ansaetze.nothing)
 
-        if output_interpretation != "all":
-            output_interpretation = int(output_interpretation)
+        if output_interpretation > 0:
+            output_interpretation = output_interpretation
             assert output_interpretation < n_qubits, (
                 f"Output interpretation parameter {output_interpretation} "
                 "can either be a qubit (integer smaller n_qubits) or 'all'"
@@ -97,7 +97,7 @@ class Model(torch.nn.Module):
         return self.forward(model_input)
 
     def forward(self, model_input):
-        if self.output_interpretation == "all":
+        if self.output_interpretation == 0:
             out = torch.mean(self.qlayer(model_input), axis=1)
         else:
             out = self.qlayer(model_input)[self.output_interpretation]
