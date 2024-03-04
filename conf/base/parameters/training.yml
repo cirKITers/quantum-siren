@@ -8,7 +8,7 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   n_qubits: 4
   n_layers: 22
   vqc_ansatz: "circuit_19"
-  iec_ansatz: "spread_layers"
+  iec_ansatz: "default"
   data_reupload: 1.0
   learning_rate: 0.05
   shots: "None"
@@ -16,6 +16,6 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   steps: 150
   report_figure_every_n_steps: 20
   loss: "mse" #mse, fft_ssim, ssim, psnr
-  output_interpretation: ${output_interpretation}
+  output_interpretation: 0 # 0 to use all qubits or a specific qubit number
   seed: 1111
-  max_workers: "None" # sets the number of workers that the pennylane simulators spawns
+  max_workers: "None"
