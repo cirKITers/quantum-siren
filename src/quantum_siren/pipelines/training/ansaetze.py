@@ -67,6 +67,24 @@ class ansaetze:
             )
 
     @staticmethod
+    def strongly_entangling_layers(params: torch.Tensor | np.ndarray):
+        """Encoding of two dimensional data using RX and RY gates.
+        The input is repeated across all qubits (vertically),
+        as specified by the shape of the input.
+
+        Args:
+            params (torch.Tensor | np.ndarray): Input data with the first value
+            parameterizing the RX gate and the second value parameterizing the RY gate.
+            Expects form to be [n_qubits, 3]
+        """
+        if params is None:
+            return 3
+
+        qml.StronglyEntanglingLayers(
+            params.reshape(1, *params.shape), wires=range(params.shape[0])
+        )
+
+    @staticmethod
     def default(params: torch.Tensor | np.ndarray):
         """Encoding of two dimensional data using RX and RY gates.
         The input is repeated across all qubits (vertically),
