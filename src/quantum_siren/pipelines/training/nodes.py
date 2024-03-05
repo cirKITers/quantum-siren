@@ -5,9 +5,7 @@ generated using Kedro 0.18.12
 
 import torch
 from torchmetrics.image import StructuralSimilarityIndexMeasure, PeakSignalNoiseRatio
-
-import math
-import logging
+from torch.utils.data import DataLoader
 
 import plotly.graph_objects as go
 
@@ -94,7 +92,6 @@ class Instructor:
         else:
             raise KeyError(f"No optimizer {optimizer} in {optimizers}")
         # self.optim = torch.optim.Adam(lr=learning_rate, params=self.model.parameters())
-        pass
 
         self.metrics = {
             "mse": self.mse,
@@ -137,6 +134,8 @@ class Instructor:
         Returns:
             torch.Tensor: The SSIM value between the predicted and target tensors.
         """
+        if self.sidelength == -1:
+            return -1
         pred_spectrum = torch.fft.fft2(pred.view(self.sidelength, self.sidelength))
         pred_spectrum = torch.fft.fftshift(pred_spectrum)
 
@@ -164,6 +163,8 @@ class Instructor:
         Returns:
             float: The calculated Structural Similarity Index (SSIM) value.
         """
+        if self.sidelength == -1:
+            return -1
         ssim = StructuralSimilarityIndexMeasure(data_range=1.0)
         val = ssim(
             pred.reshape(1, 1, self.sidelength, self.sidelength),
@@ -184,6 +185,8 @@ class Instructor:
         Returns:
             float: The PSNR value.
         """
+        if self.sidelength == -1:
+            return -1
         psnr = PeakSignalNoiseRatio(data_range=1.0)
         val = psnr(
             pred.reshape(1, 1, self.sidelength, self.sidelength),
@@ -208,66 +211,94 @@ class Instructor:
 
         return val
 
-    def calculate_sidelength(self, img: torch.Tensor):
-        self.sidelength = int(math.sqrt(img.shape[0]))
+    def set_sidelength(self, dataloader: DataLoader):
+        if len(dataloader.dataset.shape) == 3:
+            self.sidelength = dataloader.dataset.sidelength
+        elif len(dataloader.dataset.shape) == 2:
+            self.sidelength = -1
+        else:
+            raise ValueError(f"Unsupported shape {dataloader.dataset.shape}")
 
-    def train(self, model_input: torch.Tensor, ground_truth: torch.Tensor, steps: int):
+    def train(self, dataloader: DataLoader, steps: int):
         """
         Trains the model using the given input and ground truth data
         for the specified number of steps.
 
         Args:
-            model_input (torch.Tensor): The input data for the model.
-            ground_truth (torch.Tensor): The ground truth data for the model.
+            dataloader (torch.utils.data.DataLoader): The input data.
             steps (int): The number of steps to train the model.
 
         Returns:
             torch.nn.Module: The trained model.
         """
-        self.calculate_sidelength(ground_truth)
+        self.set_sidelength(dataloader)
 
         for step in range(steps):
-            model_output = self.model(model_input)
+            metrics = {}
+            loss_val = 0
 
-            loss_val = self.cost(model_output, ground_truth)
-            # mlflow.log_metric("Loss", loss_val.item(), step)
+            # Iterate the dataloader
+            for coord, target in iter(dataloader):
+                pred = self.model(coord)
+
+                loss = self.cost(pred, target)
+
+                self.optim.zero_grad()
+                loss.backward()
+                self.optim.step()
+
+                loss_val += loss.item()
+
+            # Debug print to show progress in dev mode
+            log.debug(f"Step {step}:\t Loss: {loss_val / len(dataloader)}")
+
+            # Retrieve coordinates, predictions and target for reporting
+            coords = dataloader.dataset.coords
+            pred = self.model(coords).cpu().detach()
+            targets = dataloader.dataset.values
 
             for name, metric in self.metrics.items():
-                val = metric(model_output, ground_truth)
-                mlflow.log_metric(name, val, step)
+                mlflow.log_metric(name, metric(pred, targets) / len(dataloader), step)
 
+            # Report figures
             if not step % self.steps_till_summary:
-                # print(self.params)
-                # print(f"Step {step}:\t Loss: {loss_val.item()}\t SSIM: {ssim_val}")
-                fig = go.Figure(
-                    data=go.Heatmap(
-                        z=model_output.cpu()
-                        .view(self.sidelength, self.sidelength)
-                        .detach()
-                        .numpy(),
-                        colorscale="RdBu",
-                        zmid=0,
+                if self.sidelength != -1:
+                    fig = go.Figure(
+                        data=go.Heatmap(
+                            z=pred.view(self.sidelength, self.sidelength),
+                            colorscale="RdBu",
+                            zmid=0,
+                        )
                     )
-                )
-                fig.update_layout(
-                    yaxis=dict(scaleanchor="x", autorange="reversed"),
-                    plot_bgcolor="rgba(0,0,0,0)",
-                )
+                    fig.update_layout(
+                        yaxis=dict(scaleanchor="x", autorange="reversed"),
+                        plot_bgcolor="rgba(0,0,0,0)",
+                    )
+                else:
+                    fig = go.Figure(
+                        data=[
+                            go.Scatter(
+                                x=coords.flatten(),
+                                y=pred,
+                                mode="lines",
+                                name="Prediction",
+                            ),
+                            go.Scatter(
+                                x=coords.flatten(),
+                                y=targets,
+                                mode="lines",
+                                name="Target",
+                            ),
+                        ]
+                    )
+                    fig.update_layout(
+                        yaxis=dict(range=[-1.1, 1.1]),
+                        plot_bgcolor="rgba(0,0,0,0)",
+                    )
 
+                # Report this figure directly to mlflow (not via kedro)
+                # to show progress in mlflow dashboard
                 mlflow.log_figure(fig, f"prediction_step_{step}.html")
-                # print(f"Params: {params}")
-                # img_grad = gradient(model_output, coords)
-                # img_laplacian = laplace(model_output, coords)
-
-                # fig, axes = plt.subplots(1,3, figsize=(18,6))
-                # axes[1].imshow(img_grad.norm(dim=-1).cpu().view(sidelength,sidelength).detach().numpy())
-                # axes[2].imshow(img_laplacian.cpu().view(sidelength,sidelength).detach().numpy())
-                # plt.show()
-                log.debug(f"Step {step}:\t Loss: {loss_val.item()}")
-
-            self.optim.zero_grad()
-            loss_val.backward()
-            self.optim.step()
 
         return self.model
 
@@ -308,8 +339,7 @@ def training(
     optimizer: str,
     output_interpretation: int,
     loss: str,
-    model_input: torch.Tensor,
-    ground_truth: torch.Tensor,
+    dataloader,
     steps: int,
     seed: int,
     max_workers: int,
@@ -330,8 +360,7 @@ def training(
         optimizer (str): Optimizer type
         output_interpretation (int): Output interpretation
         loss (str): Loss function
-        model_input (torch.Tensor): Model input
-        ground_truth (torch.Tensor): Ground truth
+        dataloader (torch.utils.data.DataLoader): The input data
         steps (int): Number of training steps
         seed (int): Random seed
         max_workers (int): Maximum number of workers
@@ -355,7 +384,7 @@ def training(
         max_workers,
     )
 
-    model = instructor.train(model_input, ground_truth, steps)
+    model = instructor.train(dataloader, steps)
 
     logging.info("Logging Model to MlFlow")
     mlflow.pytorch.log_model(
