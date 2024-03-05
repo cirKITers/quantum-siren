@@ -1,5 +1,6 @@
 mlruns
 .mlruns_bckp
+slurm_job.sh
 
 ##########################
 # KEDRO PROJECT
