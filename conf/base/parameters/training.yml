@@ -7,7 +7,8 @@
 training: #see globals.yml for adjustment of n_qubits, n_layers,...
   n_qubits: 4
   n_layers: 22
-  vqc_ansatz: "circuit_19"
+  #circuit_18, circuit_19, strongly_entangling_layers
+  vqc_ansatz: "strongly_entangling_layers" 
   iec_ansatz: "default"
   data_reupload: 1.0
   learning_rate: 0.05
