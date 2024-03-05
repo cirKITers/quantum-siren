@@ -30,8 +30,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             "output_interpretation": "params:output_interpretation",
             "loss": "params:loss",
             # "instructor": "instructor",
-            "model_input": "coordinates",
-            "ground_truth": "values",
+            "dataloader": "dataloader",
             "steps": "params:steps",
             "seed": "params:seed",
             "max_workers": "params:max_workers",
@@ -40,7 +39,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
     return pipeline(
         [nd_training],
-        inputs={"coordinates": "coordinates", "values": "values"},
+        inputs={"dataloader": "dataloader"},
         outputs={"model": "model"},
         namespace="training",
     )

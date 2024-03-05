@@ -5,10 +5,14 @@
 # Link: https://docs.kedro.org/en/0.18.12/kedro_project_setup/configuration.html#parameters
 
 preprocessing:
-  sidelength: 14
-  batch_size: 1
-  pin_memory: True
-  num_workers: 0
-  img_val_min: -1
-  img_val_max: 1
+  batch_size: 10
+  mode: "image" # image, cosine
+  domain: [0,1] # domain of x values
+  scale_domain_by_pi: True
+
+  # 'image' mode parameter
+  sidelength: 11
   nonlinear_coords: False
+
+  # 'cosine' mode parameter
+  omega: [1.0,2.0,3.0] # frequencies
