@@ -101,7 +101,7 @@ class Model(torch.nn.Module):
         return self.forward(model_input)
 
     def forward(self, model_input):
-        if self.output_interpretation == 0:
+        if self.output_interpretation < 0:
             out = torch.mean(self.qlayer(model_input), axis=1)
         else:
             out = self.qlayer(model_input)[self.output_interpretation]
