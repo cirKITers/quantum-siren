@@ -61,17 +61,6 @@ class Model(torch.nn.Module):
             {"weights": [self._n_layers_p1, n_qubits, self.vqc(None)]},
         )
 
-        self.initialize_params(
-            n_qubits=self.n_qubits,
-            n_layers=self._n_layers_p1,
-            n_gates_per_layer=self.vqc(None),
-        )
-
-    def initialize_params(self, n_qubits, n_layers, n_gates_per_layer):
-        self.params = torch.nn.Parameter(
-            torch.rand(size=(n_layers, n_qubits, n_gates_per_layer), requires_grad=True)
-        )
-
     def circuit(self, weights, inputs=None):
         if inputs is None:
             inputs = self._inputs
