@@ -93,6 +93,6 @@ class Model(torch.nn.Module):
         if self.output_interpretation < 0:
             out = torch.mean(self.qlayer(model_input), axis=1)
         else:
-            out = self.qlayer(model_input)[self.output_interpretation]
+            out = self.qlayer(model_input)[:, self.output_interpretation]
 
         return out
