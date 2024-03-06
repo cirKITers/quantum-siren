@@ -29,16 +29,19 @@ class Model(torch.nn.Module):
         self.shots = None if shots == "None" else shots
         self.max_workers = None if max_workers == "None" else max_workers
         self.n_qubits = n_qubits
-        self.n_layers = n_layers
+        # Following the ideas from https://doi.org/10.48550/arXiv.2008.08605
+        # we add an additional layer to "sourround" our encoding
+        self.n_layers = n_layers  # number of "visible" layers
+        self._n_layers_p1 = n_layers + 1  # number of actual layers for weight init etc.
 
         self.iec = getattr(ansaetze, iec_ansatz, ansaetze.nothing)
         self.vqc = getattr(ansaetze, vqc_ansatz, ansaetze.nothing)
 
-        if output_interpretation > 0:
-            output_interpretation = output_interpretation
-            assert output_interpretation < n_qubits, (
+        if output_interpretation >= 0:
+            output_interpretation = int(output_interpretation)
+            assert output_interpretation < self.n_qubits, (
                 f"Output interpretation parameter {output_interpretation} "
-                "can either be a qubit (integer smaller n_qubits) or 'all'"
+                "can either be a qubit (integer smaller n_qubits) or <0 (all qubits)"
             )
 
         self.output_interpretation = output_interpretation
@@ -55,7 +58,7 @@ class Model(torch.nn.Module):
         self.qnode = qml.QNode(self.circuit, dev, interface="torch")
         self.qlayer = qml.qnn.TorchLayer(
             self.qnode,
-            {"weights": [n_layers, n_qubits, self.vqc(None)]},
+            {"weights": [self._n_layers_p1, n_qubits, self.vqc(None)]},
         )
 
     def circuit(self, weights, inputs=None):
@@ -68,15 +71,16 @@ class Model(torch.nn.Module):
         if self.data_reupload != 0:
             dru[:: int(1 / self.data_reupload)] = 1
 
-        for l, l_params in enumerate(weights):
-            if l == 0 or dru[l] == 1:
+        # when iterating weights, the first dim. is the layer, the second is qubits
+        for layer, layer_params in enumerate(weights[:-1]):  # N of (N+1) layers
+            self.vqc(layer_params)
+            qml.Barrier()
+            if layer == 0 or dru[layer] == 1:
                 self.iec(
                     torch.stack([inputs] * self.n_qubits),
                 )  # half because the coordinates already have 2 dims
 
-            self.vqc(l_params)
-
-            qml.Barrier()
+        self.vqc(weights[-1])  # the N+1 layer
 
         return [qml.expval(qml.PauliZ(i)) for i in range(self.n_qubits)]
 
@@ -86,24 +90,9 @@ class Model(torch.nn.Module):
         return self.forward(model_input)
 
     def forward(self, model_input):
-        # return self.qlayer(model_input)
-
-        if model_input.ndim == 2:
-            out = torch.zeros(
-                size=[
-                    model_input.shape[0],
-                ]
-            )
-
-            # with Pool(processes=4) as pool:
-            #     out = pool.starmap(self.qnode, [[params, coord] for coord in model_input])
-
-            for i, coord in enumerate(model_input):
-                if self.output_interpretation > 0:
-                    out[i] = self.qlayer(coord)[self.output_interpretation]
-                else:
-                    out[i] = torch.mean(self.qlayer(coord), axis=0)
+        if self.output_interpretation < 0:
+            out = torch.mean(self.qlayer(model_input), axis=1)
         else:
-            out = self.qlayer(model_input)[-1]
+            out = self.qlayer(model_input)[self.output_interpretation]
 
         return out
