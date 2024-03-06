@@ -19,11 +19,7 @@ class ansaetze:
             being utilized in the layer.
             Expects form to be [n_qubits, n_gates_per_layer],
             where n_gates_per_layer=3 in this case.
-            If None, then the number of required params per layer is returned.
         """
-        if params is None:
-            return 3
-
         for qubit, qubit_params in enumerate(params):
             qml.RX(qubit_params[0], wires=qubit)
             qml.RZ(qubit_params[1], wires=qubit)
@@ -48,11 +44,7 @@ class ansaetze:
             being utilized in the layer.
             Expects form to be [n_qubits, n_gates_per_layer],
             where n_gates_per_layer=3 in this case.
-            If None, then the number of required params per layer is returned.
         """
-        if params is None:
-            return 3
-
         for qubit, qubit_params in enumerate(params):
             qml.RX(qubit_params[0], wires=qubit)
             qml.RZ(qubit_params[1], wires=qubit)
@@ -77,11 +69,7 @@ class ansaetze:
             parameterizing the RX gate and the second value parameterizing the RY gate.
             Expects form to be [n_qubits, n_gates_per_layer],
             where n_gates_per_layer=3 in this case.
-            If None, then the number of required params per layer is returned.
         """
-        if params is None:
-            return 3
-
         qml.StronglyEntanglingLayers(
             params.reshape(1, *params.shape), wires=range(params.shape[0])
         )
