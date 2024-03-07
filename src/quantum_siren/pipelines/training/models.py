@@ -56,6 +56,7 @@ class Model(torch.nn.Module):
         )
 
         self.qnode = qml.QNode(self.circuit, dev, interface="torch")
+        # print(qml.draw(self.circuit)(torch.rand(self._n_layers_p1, n_qubits, self.vqc(None)), torch.tensor([[0,1]])))
         self.qlayer = qml.qnn.TorchLayer(
             self.qnode,
             {"weights": [self._n_layers_p1, n_qubits, self.vqc(None)]},
@@ -82,7 +83,10 @@ class Model(torch.nn.Module):
 
         self.vqc(weights[-1])  # the N+1 layer
 
-        return [qml.expval(qml.PauliZ(i)) for i in range(self.n_qubits)]
+        if self.output_interpretation < 0:
+            return [qml.expval(qml.PauliZ(i)) for i in range(self.n_qubits)]
+        else:
+            return qml.expval(qml.PauliZ(self.output_interpretation))
 
     def predict(self, context, model_input):
         if type(model_input) != torch.Tensor:
@@ -93,6 +97,6 @@ class Model(torch.nn.Module):
         if self.output_interpretation < 0:
             out = torch.mean(self.qlayer(model_input), axis=1)
         else:
-            out = self.qlayer(model_input)[:, self.output_interpretation]
+            out = self.qlayer(model_input)
 
         return out
