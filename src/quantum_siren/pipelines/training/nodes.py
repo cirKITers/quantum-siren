@@ -32,8 +32,12 @@ class EarlyStopping:
         self.counter = 0
         self.best_loss = None
         self.early_stop = False
+        self.loss_log = []
 
     def ask(self, loss):
+        self.loss_log.append(loss)
+        if len(self.loss_log) > self.patience:
+            var = torch.var(torch.tensor(self.loss_log[-self.patience :]))
         if self.best_loss is None:
             self.best_loss = loss
         elif self.best_loss - loss < self.min_delta:
