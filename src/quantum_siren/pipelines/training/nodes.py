@@ -25,6 +25,28 @@ optimizers = {
 log = logging.getLogger(__name__)
 
 
+class EarlyStopping:
+    def __init__(self, patience=15, min_delta=0.002):
+        self.patience = patience
+        self.min_delta = min_delta
+        self.counter = 0
+        self.best_loss = None
+        self.early_stop = False
+
+    def ask(self, loss):
+        if self.best_loss is None:
+            self.best_loss = loss
+        elif self.best_loss - loss < self.min_delta:
+            self.counter += 1
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_loss = loss
+            self.counter = 0
+
+        return self.early_stop
+
+
 class Instructor:
     def __init__(
         self,
@@ -79,6 +101,8 @@ class Instructor:
             output_interpretation,
             max_workers,
         )
+
+        self.earlyStopping = EarlyStopping()
 
         if optimizer == "QNG":
             self.optim = QNG(
@@ -299,6 +323,11 @@ class Instructor:
                 # Report this figure directly to mlflow (not via kedro)
                 # to show progress in mlflow dashboard
                 mlflow.log_figure(fig, f"prediction_step_{step}.html")
+
+            # Early Stopping
+            if self.earlyStopping.ask(loss_val):
+                log.info(f"Early stopping triggered in step {step}")
+                break
 
         return self.model
 
