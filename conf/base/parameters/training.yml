@@ -6,16 +6,16 @@
 
 training: #see globals.yml for adjustment of n_qubits, n_layers,...
   n_qubits: 4
-  n_layers: 22
+  n_layers: 7
   #circuit_18, circuit_19, strongly_entangling_layers
   vqc_ansatz: "strongly_entangling_layers" 
   iec_ansatz: "default"
   data_reupload: 1.0
-  learning_rate: 0.05
+  learning_rate: 0.07
   shots: "None"
   optimizer: "Adam"
-  steps: 150
-  report_figure_every_n_steps: 20
+  steps: 600
+  report_figure_every_n_steps: 50
   loss: "mse" #mse, fft_ssim, ssim, psnr
   output_interpretation: -1 # -1 to use all qubits or a specific qubit number
   seed: 1111
