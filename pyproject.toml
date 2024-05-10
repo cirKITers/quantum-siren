@@ -31,10 +31,10 @@ torch = [
     {version = "2.1.0+cpu", source = "torch_cpu", markers = "extra != 'gpu'"}
 ]
 torchvision = "^0.16.0"
-kedro = "^0.18.12"
+kedro = "^0.19.5"
 torchsummary = "^1.5.1"
 torchmetrics = "^1.0.2"
-kedro-mlflow = "^0.11.9"
+kedro-mlflow = "^0.12.2"
 plotly = "^5.15.0"
 black = "^23.9.1"
 
@@ -47,7 +47,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.kedro]
 package_name = "quantum_siren"
 project_name = "quantum_siren"
-kedro_init_version = "0.18.12"
+kedro_init_version = "0.19.5"
 
 [tool.isort]
 profile = "black"
