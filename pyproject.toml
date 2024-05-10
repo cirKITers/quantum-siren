@@ -19,7 +19,7 @@ priority = "explicit"
 gpu=["torchvision"]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.11"
+python = ">=3.9,<3.12"
 pennylane = "^0.33.1"
 pillow = "^10.1.0"
 scikit-image = "^0.21.0"
@@ -36,7 +36,7 @@ torchsummary = "^1.5.1"
 torchmetrics = "^1.0.2"
 kedro-mlflow = "^0.12.2"
 plotly = "^5.15.0"
-black = "^23.9.1"
+black = "^24.4.2"
 
 
 
