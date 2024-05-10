@@ -3854,4 +3854,4 @@ gpu = ["torchvision"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "3f6a46df20a4ac7ccdde6f22bdd8b9b0c4501c8d34b9e832e54bda7871fe9a96"
+content-hash = "cba3a418b393a9e25727d37d0cf9ecd1b8e28bd6d736a8a3b8258ed4b0267e55"
