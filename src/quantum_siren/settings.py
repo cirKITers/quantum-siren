@@ -31,13 +31,11 @@ https://kedro.readthedocs.io/en/stable/kedro_project_setup/settings.html."""
 #       }
 # }
 
-from kedro.config import TemplatedConfigLoader
 from kedro.config import OmegaConfigLoader
 
 CONFIG_LOADER_CLASS = OmegaConfigLoader
-# CONFIG_LOADER_CLASS = TemplatedConfigLoader
 CONFIG_LOADER_ARGS = {
-    "config_patterns": {"globals": ["globals.yml", "**/training.yml"]}
+    "config_patterns": {"globals": ["globals.yml", "**/parameters_training.yml"]},
 }
 
 
