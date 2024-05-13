@@ -7,7 +7,7 @@
 preprocessing:
   batch_size: -1
   mode: "cosine" # image, cosine
-  domain: [-1,1] # domain of x values
+  domain: [-0.7,0.7] # domain of x values
   scale_domain_by_pi: True
 
   # 'image' mode parameter
@@ -15,4 +15,7 @@ preprocessing:
   nonlinear_coords: False
 
   # 'cosine' mode parameter
-  omega: [[1.0,2.0,3.0,4.0], [1.0,2.0,3.0,4.0], [1.0,2.0,3.0,4.0]] # frequencies
+  # Frequencies for the fourier series
+  # Up to 3 dim allowed but each dimension must have the same length.
+  # Different lenghts are supported by using '0's as placeholder
+  omega: [[1.0,2.0,3.0,4.0], [1.0,2.0,3.0,0.0], [1.0,2.0,0.0,0.0]] 
