@@ -259,7 +259,7 @@ class Instructor:
                 mlflow.log_metric(name, metric(pred, targets) / len(dataloader), step)
 
             # Report figures
-            if not step % self.steps_till_summary:
+            if not step + 1 % self.steps_till_summary or step == 0:
                 fig = None
                 if len(dataloader.dataset.shape) == 4:
 
