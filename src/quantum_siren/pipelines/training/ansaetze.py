@@ -95,9 +95,22 @@ class ansaetze:
             Expects form to be [n_qubits, batch, 2]
         """
         for qubit, qubit_params in enumerate(params):
-            qml.RX(qubit_params[:, 0], wires=qubit)
-            if qubit_params.shape[1] > 1:
+            if qubit_params.shape[1] == 1:
+                qml.RX(qubit_params[:, 0], wires=qubit)
+            elif qubit_params.shape[1] == 2:
+                qml.RX(qubit_params[:, 0], wires=qubit)
                 qml.RY(qubit_params[:, 1], wires=qubit)
+            elif qubit_params.shape[1] == 3:
+                qml.Rot(
+                    qubit_params[:, 0],
+                    qubit_params[:, 1],
+                    qubit_params[:, 2],
+                    wires=qubit,
+                )
+            else:
+                raise ValueError(
+                    "The number of parameters for this IEC cannot be greater than 3"
+                )
 
     @staticmethod
     def spread_layers(params: torch.Tensor | np.ndarray):
