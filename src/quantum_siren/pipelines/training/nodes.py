@@ -8,6 +8,8 @@ from torchmetrics.image import StructuralSimilarityIndexMeasure, PeakSignalNoise
 from torch.utils.data import DataLoader
 
 import plotly.graph_objects as go
+from plotly.express import colors
+
 
 import mlflow
 import logging
@@ -228,6 +230,7 @@ class Instructor:
         """
         self.set_sidelength(dataloader)
 
+        log.info(f"Training for {steps} steps")
         for step in range(steps):
             loss_val = 0
 
@@ -257,7 +260,37 @@ class Instructor:
             # Report figures
             if not step % self.steps_till_summary:
                 fig = None
-                if dataloader.dataset.shape == 3:
+                if len(dataloader.dataset.shape) == 4:
+
+                    def add_opacity(colorscale):
+                        for color in colorscale:
+                            rgb = colors.hex_to_rgb(color[1])
+                            color[1] = (
+                                f"rgba({rgb[0]}, {rgb[1]}, {rgb[2]}, {max(0.1, color[0])})"
+                            )
+
+                        return colorscale
+
+                    fig = go.Figure(
+                        data=go.Scatter3d(
+                            x=dataloader.dataset.coords[:, 0],
+                            y=dataloader.dataset.coords[:, 1],
+                            z=dataloader.dataset.coords[:, 2],
+                            mode="markers",
+                            marker=dict(
+                                size=20 * pred.abs() + 1.0,
+                                color=pred,  # set color to an array/list of desired values
+                                colorscale=add_opacity(
+                                    colors.get_colorscale("Plasma")
+                                ),  # choose a colorscale
+                                opacity=1.0,
+                            ),
+                        )
+                    )
+                    fig.update_layout(
+                        template="simple_white",
+                    )
+                elif len(dataloader.dataset.shape) == 3:
                     fig = go.Figure(
                         data=go.Heatmap(
                             z=pred.view(
@@ -272,7 +305,7 @@ class Instructor:
                         yaxis=dict(scaleanchor="x", autorange="reversed"),
                         plot_bgcolor="rgba(0,0,0,0)",
                     )
-                elif dataloader.dataset.shape == 2:
+                elif len(dataloader.dataset.shape) == 2:
                     fig = go.Figure(
                         data=[
                             go.Scatter(
@@ -295,7 +328,7 @@ class Instructor:
                     )
                 else:
                     log.warning(
-                        f"Dataset has {dataloader.dataset.shape} dimensions.
+                        f"Dataset has {len(dataloader.dataset.shape)} dimensions.\
                         No visualization possible"
                     )
 

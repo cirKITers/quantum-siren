@@ -12,6 +12,7 @@ from torchvision.transforms import Resize, Compose, ToTensor, Normalize
 import skimage
 
 import plotly.graph_objects as go
+from plotly.express import colors
 
 import logging
 
@@ -167,21 +168,49 @@ def extract_data(dataset):
 
 
 def gen_ground_truth_fig(dataset):
-    if len(dataset.shape) == 3:
+    if len(dataset.shape) == 4:
+
+        def add_opacity(colorscale):
+            for color in colorscale:
+                rgb = colors.hex_to_rgb(color[1])
+                color[1] = f"rgba({rgb[0]}, {rgb[1]}, {rgb[2]}, {max(0.1, color[0])})"
+
+            return colorscale
+
+        fig = go.Figure(
+            data=go.Scatter3d(
+                x=dataset.coords[:, 0],
+                y=dataset.coords[:, 1],
+                z=dataset.coords[:, 2],
+                mode="markers",
+                marker=dict(
+                    size=20 * dataset.values.abs() + 1.0,
+                    color=dataset.values,  # set color to an array/list of desired values
+                    colorscale=add_opacity(
+                        colors.get_colorscale("Plasma")
+                    ),  # choose a colorscale
+                    opacity=1.0,
+                ),
+            )
+        )
+        fig.update_layout(
+            template="simple_white",
+        )
+    elif len(dataset.shape) == 3:
         sidelength = dataset.sidelength
-        ground_truth_fig = go.Figure(
+        fig = go.Figure(
             data=go.Heatmap(
                 z=dataset.values.view(sidelength, sidelength).detach().numpy(),
                 colorscale="RdBu",
                 zmid=0,
             )
         )
-        ground_truth_fig.update_layout(
+        fig.update_layout(
             yaxis=dict(scaleanchor="x", autorange="reversed"),
             plot_bgcolor="rgba(0,0,0,0)",
         )
     else:
-        ground_truth_fig = go.Figure(
+        fig = go.Figure(
             data=go.Scatter(
                 x=dataset.coords.detach().numpy(),
                 y=dataset.values.detach().numpy(),
@@ -191,4 +220,4 @@ def gen_ground_truth_fig(dataset):
 
     # mlflow.log_figure(fig, f"ground_truth.html")
 
-    return {"ground_truth_fig": ground_truth_fig}
+    return {"ground_truth_fig": fig}
