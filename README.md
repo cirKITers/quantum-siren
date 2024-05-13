@@ -88,6 +88,7 @@ The following parameters can be adjusted:
 
 ## Literature :books:
 
-[1]: [Implicit Neural Representations with Periodic Activation Functions](https://doi.org/10.48550/arXiv.2006.09661)
+[1]: [Implicit Neural Representations with Periodic Activation Functions](https://doi.org/10.48550/arXiv.2006.09661)\
 [2]: [Expressibility and entangling capability of parameterized quantum circuits for hybrid quantum-classical algorithms
-](https://doi.org/10.1002/qute.201900070)
+](https://doi.org/10.1002/qute.201900070)\
+[3]: [The effect of data encoding on the expressive power of variational quantum machine learning models](https://doi.org/10.48550/arXiv.2008.08605)
