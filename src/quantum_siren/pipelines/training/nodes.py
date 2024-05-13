@@ -214,10 +214,8 @@ class Instructor:
     def set_sidelength(self, dataloader: DataLoader):
         if len(dataloader.dataset.shape) == 3:
             self.sidelength = dataloader.dataset.sidelength
-        elif len(dataloader.dataset.shape) == 2:
-            self.sidelength = -1
         else:
-            raise ValueError(f"Unsupported shape {dataloader.dataset.shape}")
+            self.sidelength = -1  # Indicate that we cannot use fft_ssim etc.
 
     def train(self, dataloader: DataLoader, steps: int):
         """
@@ -262,10 +260,13 @@ class Instructor:
 
             # Report figures
             if not step % self.steps_till_summary:
-                if self.sidelength != -1:
+                if dataloader.dataset.shape == 3:
                     fig = go.Figure(
                         data=go.Heatmap(
-                            z=pred.view(self.sidelength, self.sidelength),
+                            z=pred.view(
+                                dataloader.dataset.sidelength,
+                                dataloader.dataset.sidelength,
+                            ),
                             colorscale="RdBu",
                             zmid=0,
                         )
@@ -274,7 +275,7 @@ class Instructor:
                         yaxis=dict(scaleanchor="x", autorange="reversed"),
                         plot_bgcolor="rgba(0,0,0,0)",
                     )
-                else:
+                elif dataloader.dataset.shape == 2:
                     fig = go.Figure(
                         data=[
                             go.Scatter(
@@ -294,6 +295,10 @@ class Instructor:
                     fig.update_layout(
                         yaxis=dict(range=[-1.1, 1.1]),
                         plot_bgcolor="rgba(0,0,0,0)",
+                    )
+                else:
+                    log.warning(
+                        f"Dataset has {dataloader.dataset.shape} dimensions. No visualization possible"
                     )
 
                 # Report this figure directly to mlflow (not via kedro)
