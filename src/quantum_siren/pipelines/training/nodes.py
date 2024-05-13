@@ -299,8 +299,8 @@ class Instructor:
                     )
                 else:
                     log.warning(
-                        f"Dataset has {dataloader.dataset.shape} dimensions.\\
-                            No visualization possible"
+                        f"Dataset has {dataloader.dataset.shape} dimensions.
+                        No visualization possible"
                     )
 
                 if fig is not None:
