@@ -260,6 +260,7 @@ class Instructor:
 
             # Report figures
             if not step % self.steps_till_summary:
+                fig = None
                 if dataloader.dataset.shape == 3:
                     fig = go.Figure(
                         data=go.Heatmap(
@@ -301,9 +302,10 @@ class Instructor:
                         f"Dataset has {dataloader.dataset.shape} dimensions. No visualization possible"
                     )
 
-                # Report this figure directly to mlflow (not via kedro)
-                # to show progress in mlflow dashboard
-                mlflow.log_figure(fig, f"prediction_step_{step}.html")
+                if fig is not None:
+                    # Report this figure directly to mlflow (not via kedro)
+                    # to show progress in mlflow dashboard
+                    mlflow.log_figure(fig, f"prediction_step_{step}.html")
 
         return self.model
 
