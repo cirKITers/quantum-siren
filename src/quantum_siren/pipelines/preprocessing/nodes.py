@@ -86,17 +86,27 @@ class ImageFitting(Dataset):
 
 class CosineFitting(Dataset):
     def __init__(self, domain, omega_d):
-        n_d = int(torch.ceil(2 * torch.max(torch.abs(domain)) * torch.max(omega_d)))
-        self.shape = (n_d, 1)
+        if len(omega_d.shape) == 1:
+            omega_d = omega_d.reshape(1, -1)
 
-        log.info(f"Using {n_d} data points")
+        # using the max of all dimensions because we want uniform sampling
+        n_d = int(torch.ceil(2 * torch.max(torch.abs(domain)) * torch.max(omega_d)))
+        self.shape = [n_d for _ in range(omega_d.shape[0])]
+        self.shape.append(1)
+        self.sidelength = n_d
+
+        log.info(f"Using {n_d} data points on {omega_d.shape[0]} dimensions")
 
         # self.coords = torch.linspace(x_domain[0], x_domain[1], n_d)
-        self.coords = get_mgrid(domain, n_d, dim=1)
+        self.coords = get_mgrid(domain, n_d, dim=omega_d.shape[0])
 
         # Formula (4) in referenced paper 2309.03279
         def y(x):
-            return 1 / torch.linalg.norm(omega_d) * torch.sum(torch.cos(omega_d * x))
+            return (
+                1
+                / torch.linalg.norm(omega_d)
+                * torch.sum(torch.cos(omega_d.T * x))  # transpose!
+            )
 
         self.values = torch.stack([y(x) for x in self.coords])
 
