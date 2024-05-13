@@ -10,12 +10,13 @@ from torch.utils.data import DataLoader
 import plotly.graph_objects as go
 from plotly.express import colors
 
-
 import mlflow
 import logging
 
 from .models import Model
 from .optimizer import QNG, Adam
+
+from ...helpers.visualization import add_opacity
 
 from typing import Dict
 
@@ -262,15 +263,6 @@ class Instructor:
                 fig = None
                 if len(dataloader.dataset.shape) == 4:
 
-                    def add_opacity(colorscale):
-                        for color in colorscale:
-                            rgb = colors.hex_to_rgb(color[1])
-                            color[1] = (
-                                f"rgba({rgb[0]}, {rgb[1]}, {rgb[2]}, {max(0.1, color[0])})"
-                            )
-
-                        return colorscale
-
                     fig = go.Figure(
                         data=go.Scatter3d(
                             x=dataloader.dataset.coords[:, 0],
@@ -279,7 +271,7 @@ class Instructor:
                             mode="markers",
                             marker=dict(
                                 size=20 * pred.abs() + 1.0,
-                                color=pred,  # set color to an array/list of desired values
+                                color=pred,
                                 colorscale=add_opacity(
                                     colors.get_colorscale("Plasma")
                                 ),  # choose a colorscale

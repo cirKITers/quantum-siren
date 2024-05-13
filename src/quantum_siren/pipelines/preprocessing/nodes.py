@@ -14,6 +14,8 @@ import skimage
 import plotly.graph_objects as go
 from plotly.express import colors
 
+from ...helpers.visualization import add_opacity
+
 import logging
 
 log = logging.getLogger(__name__)
@@ -170,13 +172,6 @@ def extract_data(dataset):
 def gen_ground_truth_fig(dataset):
     if len(dataset.shape) == 4:
 
-        def add_opacity(colorscale):
-            for color in colorscale:
-                rgb = colors.hex_to_rgb(color[1])
-                color[1] = f"rgba({rgb[0]}, {rgb[1]}, {rgb[2]}, {max(0.1, color[0])})"
-
-            return colorscale
-
         fig = go.Figure(
             data=go.Scatter3d(
                 x=dataset.coords[:, 0],
@@ -185,7 +180,7 @@ def gen_ground_truth_fig(dataset):
                 mode="markers",
                 marker=dict(
                     size=20 * dataset.values.abs() + 1.0,
-                    color=dataset.values,  # set color to an array/list of desired values
+                    color=dataset.values,
                     colorscale=add_opacity(
                         colors.get_colorscale("Plasma")
                     ),  # choose a colorscale
