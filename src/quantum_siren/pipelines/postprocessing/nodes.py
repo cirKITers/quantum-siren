@@ -60,7 +60,7 @@ def upscaling(model, coords, factor, shape):
         upscaled_coords = coords
         pred_upscaled_fig = go.Figure()
 
-        log.warning("Plotting of >3D not supported.")
+        log.warning("Plotting of >2D not supported.")
 
     return {
         "pred_upscaled_fig": pred_upscaled_fig,
@@ -91,7 +91,7 @@ def pixelwise_difference(prediction, target, shape):
         )
     else:
         pixelwise_diff_fig = go.Figure()
-        log.warning("Plotting of >3D not supported.")
+        log.warning("Plotting of >2D not supported.")
 
     return {"pixelwise_diff_fig": pixelwise_diff_fig}
 
@@ -265,7 +265,7 @@ def plot_gradients(model, target, coords, shape):
             plot_bgcolor="rgba(0,0,0,0)",
         )
     else:
-        log.warning("Plotting of >3D data not supported")
+        log.warning("Plotting of >2D data not supported")
         pred_gradient_fig = go.Figure()
         pred_laplacian_fig = go.Figure()
         gt_gradient_fig = go.Figure()
