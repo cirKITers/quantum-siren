@@ -91,7 +91,6 @@ class Instructor:
             self.optim = Adam(params=self.model.parameters(), lr=learning_rate)
         else:
             raise KeyError(f"No optimizer {optimizer} in {optimizers}")
-        # self.optim = torch.optim.Adam(lr=learning_rate, params=self.model.parameters())
 
         self.metrics = {
             "mse": self.mse,
@@ -116,8 +115,6 @@ class Instructor:
             self.loss_sign = -1
         else:
             raise KeyError(f"No loss {loss} in {self.metrics}")
-
-        # del self.metrics[loss]
 
     def cost(self, *args: any) -> float:
         return self.loss(*args) * self.loss_sign
@@ -232,7 +229,6 @@ class Instructor:
         self.set_sidelength(dataloader)
 
         for step in range(steps):
-            metrics = {}
             loss_val = 0
 
             # Iterate the dataloader
