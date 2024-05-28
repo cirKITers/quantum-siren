@@ -182,9 +182,10 @@ def gen_ground_truth_fig(dataset):
                 marker=dict(
                     size=20 * dataset.values.abs() + 1.0,
                     color=dataset.values,
-                    colorscale=add_opacity(
-                        colors.get_colorscale("Plasma")
-                    ),  # choose a colorscale
+                    # colorscale=add_opacity(
+                    # colors.get_colorscale("Plasma")
+                    # ),  # choose a colorscale
+                    colorscale="Plasma",
                     opacity=1.0,
                 ),
             )
@@ -205,13 +206,18 @@ def gen_ground_truth_fig(dataset):
             yaxis=dict(scaleanchor="x", autorange="reversed"),
             plot_bgcolor="rgba(0,0,0,0)",
         )
-    else:
+    elif len(dataset.shape) == 2:
         fig = go.Figure(
             data=go.Scatter(
                 x=dataset.coords.detach().numpy(),
                 y=dataset.values.detach().numpy(),
                 mode="lines",
             )
+        )
+    else:
+        log.warning(
+            f"Dataset has {len(dataset.shape)} dimension(s).\
+            No visualization possible"
         )
 
     # mlflow.log_figure(fig, f"ground_truth.html")

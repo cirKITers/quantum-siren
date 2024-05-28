@@ -300,9 +300,10 @@ class Instructor:
                             marker=dict(
                                 size=20 * pred.abs() + 1.0,
                                 color=pred,
-                                colorscale=add_opacity(
-                                    colors.get_colorscale("Plasma")
-                                ),  # choose a colorscale
+                                # colorscale=add_opacity(
+                                # colors.get_colorscale("Plasma")
+                                # ),  # choose a colorscale
+                                colorscale="Plasma",
                                 opacity=1.0,
                             ),
                         )
@@ -348,7 +349,7 @@ class Instructor:
                     )
                 else:
                     log.warning(
-                        f"Dataset has {len(dataloader.dataset.shape)} dimensions.\
+                        f"Dataset has {len(dataloader.dataset.shape)} dimension(s).\
                         No visualization possible"
                     )
 

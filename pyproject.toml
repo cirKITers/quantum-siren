@@ -37,6 +37,7 @@ torchmetrics = "^1.0.2"
 kedro-mlflow = "^0.12.2"
 plotly = "^5.15.0"
 black = "^24.4.2"
+kaleido = "0.2.1"
 
 
 

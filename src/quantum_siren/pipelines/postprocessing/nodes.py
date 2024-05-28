@@ -60,7 +60,10 @@ def upscaling(model, coords, factor, shape):
         upscaled_coords = coords
         pred_upscaled_fig = go.Figure()
 
-        log.warning("Plotting of >2D not supported.")
+        log.warning(
+            f"Dataset has {len(shape)} dimension(s).\
+            No visualization possible"
+        )
 
     return {
         "pred_upscaled_fig": pred_upscaled_fig,
@@ -91,7 +94,10 @@ def pixelwise_difference(prediction, target, shape):
         )
     else:
         pixelwise_diff_fig = go.Figure()
-        log.warning("Plotting of >2D not supported.")
+        log.warning(
+            f"Dataset has {len(shape)} dimension(s).\
+            No visualization possible"
+        )
 
     return {"pixelwise_diff_fig": pixelwise_diff_fig}
 
@@ -265,11 +271,14 @@ def plot_gradients(model, target, coords, shape):
             plot_bgcolor="rgba(0,0,0,0)",
         )
     else:
-        log.warning("Plotting of >2D data not supported")
         pred_gradient_fig = go.Figure()
         pred_laplacian_fig = go.Figure()
         gt_gradient_fig = go.Figure()
         gt_laplacian_fig = go.Figure()
+        log.warning(
+            f"Dataset has {len(shape)} dimension(s).\
+            No visualization possible"
+        )
 
     return {
         "pred_gradient_fig": pred_gradient_fig,
@@ -352,7 +361,10 @@ def calculate_spectrum(values, shape):
     else:
         spectrum_abs_fig = go.Figure()
         spectrum_phase_fig = go.Figure()
-        log.warning("Plotting of >2D data not supported")
+        log.warning(
+            f"Dataset has {len(shape)} dimension(s).\
+            No visualization possible"
+        )
 
     return {
         "spectrum_abs_fig": spectrum_abs_fig,
