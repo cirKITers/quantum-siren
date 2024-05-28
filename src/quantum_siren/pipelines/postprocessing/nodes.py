@@ -72,6 +72,36 @@ def upscaling(model, coords, factor, shape):
     }
 
 
+def upscaling_ground_truth(ground_truth, factor):
+    sidelength = int(math.sqrt(ground_truth.shape[0]))
+    upscaled_sidelength = int(sidelength * factor)
+
+    upscaled_gt = scipy.interpolate.RectBivariateSpline(
+        np.linspace(0, 1, sidelength),
+        np.linspace(0, 1, sidelength),
+        ground_truth.cpu().view(sidelength, sidelength).detach().numpy(),
+    )
+
+    gt_upscaled_fig = go.Figure(
+        data=go.Heatmap(
+            z=upscaled_gt(
+                np.linspace(0, 1, upscaled_sidelength),
+                np.linspace(0, 1, upscaled_sidelength),
+            ),
+            colorscale="RdBu",
+            zmid=0,
+        )
+    )
+    gt_upscaled_fig.update_layout(
+        yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
+    )
+
+    return {
+        "gt_upscaled_fig": gt_upscaled_fig,
+        "upscaled_gt_image": upscaled_gt,
+    }
+
+
 def pixelwise_difference(prediction, target, shape):
     if len(shape) == 2:
         pixelwise_diff_fig = go.Figure()

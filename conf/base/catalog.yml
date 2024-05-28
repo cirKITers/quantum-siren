@@ -50,6 +50,10 @@ postprocessing.pred_upscaled_fig:
   type: quantum_siren.helpers.dataset.MlFlowPlotlyArtifact
   filepath: data/08_reporting/pred_upscaled_fig.html
 
+postprocessing.gt_upscaled_fig:
+  type: quantum_siren.helpers.dataset.MlFlowPlotlyArtifact
+  filepath: data/08_reporting/gt_upscaled_fig.html
+
 postprocessing.pred_spectrum_abs_fig:
   type: quantum_siren.helpers.dataset.MlFlowPlotlyArtifact
   filepath: data/08_reporting/pred_spectrum_abs_fig.html

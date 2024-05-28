@@ -7,6 +7,7 @@ from kedro.pipeline import Pipeline, pipeline, node
 
 from .nodes import (
     upscaling,
+    upscaling_ground_truth,
     pixelwise_difference,
     plot_gradients,
     calculate_spectrum,
@@ -39,6 +40,18 @@ def create_pipeline(**kwargs) -> Pipeline:
         },
     )
 
+    nd_upscaling_gt = node(
+        upscaling_ground_truth,
+        inputs={
+            "ground_truth": "ground_truth",
+            "factor": "params:upscale_factor",
+        },
+        outputs={
+            "gt_upscaled_fig": "gt_upscaled_fig",
+            "upscaled_gt_image": "upscaled_gt_image",
+        },
+    )
+
     nd_pixelwise_diff = node(
         pixelwise_difference,
         inputs={"prediction": "prediction", "target": "target", "shape": "shape"},
@@ -65,6 +78,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         [
             nd_predict,
             nd_upscaling,
+            nd_upscaling_gt,
             nd_pixelwise_diff,
             nd_plot_gradients,
             node(
