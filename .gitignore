@@ -1,6 +1,8 @@
 mlruns
 .mlruns_bckp
 
+*.png
+
 ##########################
 # KEDRO PROJECT
 
