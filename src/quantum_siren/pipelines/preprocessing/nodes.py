@@ -12,6 +12,9 @@ from torchvision.transforms import Resize, Compose, ToTensor, Normalize
 import skimage
 
 import plotly.graph_objects as go
+from plotly.express import colors
+
+from ...helpers.visualization import add_opacity
 
 import logging
 
@@ -86,17 +89,27 @@ class ImageFitting(Dataset):
 
 class CosineFitting(Dataset):
     def __init__(self, domain, omega_d):
-        n_d = int(torch.ceil(2 * torch.max(torch.abs(domain)) * torch.max(omega_d)))
-        self.shape = (n_d, 1)
+        if len(omega_d.shape) == 1:
+            omega_d = omega_d.reshape(1, -1)
 
-        log.info(f"Using {n_d} data points")
+        # using the max of all dimensions because we want uniform sampling
+        n_d = int(torch.ceil(2 * torch.max(torch.abs(domain)) * torch.max(omega_d)))
+        self.shape = [n_d for _ in range(omega_d.shape[0])]
+        self.shape.append(1)
+        self.sidelength = n_d
+
+        log.info(f"Using {n_d} data points on {omega_d.shape[0]} dimensions")
 
         # self.coords = torch.linspace(x_domain[0], x_domain[1], n_d)
-        self.coords = get_mgrid(domain, n_d, dim=1)
+        self.coords = get_mgrid(domain, n_d, dim=omega_d.shape[0])
 
         # Formula (4) in referenced paper 2309.03279
         def y(x):
-            return 1 / torch.linalg.norm(omega_d) * torch.sum(torch.cos(omega_d * x))
+            return (
+                1
+                / torch.linalg.norm(omega_d)
+                * torch.sum(torch.cos(omega_d.T * x))  # transpose!
+            )
 
         self.values = torch.stack([y(x) for x in self.coords])
 
@@ -133,12 +146,13 @@ def generate_dataset(
 
 
 def construct_dataloader(dataset, batch_size):
-    if batch_size > len(dataset.coords):
+    if batch_size > len(dataset.coords) or batch_size < 1:
         log.warning(
             f"Adjusting batch size to {len(dataset.coords)} (was {batch_size} before)"
         )
-    bs = min(batch_size, len(dataset.coords))
-    dataloader = DataLoader(dataset, batch_size=bs, pin_memory=True)
+        batch_size = len(dataset.coords)
+
+    dataloader = DataLoader(dataset, batch_size=batch_size, pin_memory=True)
     return {"dataloader": dataloader}
 
 
@@ -157,28 +171,55 @@ def extract_data(dataset):
 
 
 def gen_ground_truth_fig(dataset):
-    if len(dataset.shape) == 3:
+    if len(dataset.shape) == 4:
+
+        fig = go.Figure(
+            data=go.Scatter3d(
+                x=dataset.coords[:, 0],
+                y=dataset.coords[:, 1],
+                z=dataset.coords[:, 2],
+                mode="markers",
+                marker=dict(
+                    size=20 * dataset.values.abs() + 1.0,
+                    color=dataset.values,
+                    # colorscale=add_opacity(
+                    # colors.get_colorscale("Plasma")
+                    # ),  # choose a colorscale
+                    colorscale="Plasma",
+                    opacity=1.0,
+                ),
+            )
+        )
+        fig.update_layout(
+            template="simple_white",
+        )
+    elif len(dataset.shape) == 3:
         sidelength = dataset.sidelength
-        ground_truth_fig = go.Figure(
+        fig = go.Figure(
             data=go.Heatmap(
                 z=dataset.values.view(sidelength, sidelength).detach().numpy(),
                 colorscale="RdBu",
                 zmid=0,
             )
         )
-        ground_truth_fig.update_layout(
+        fig.update_layout(
             yaxis=dict(scaleanchor="x", autorange="reversed"),
             plot_bgcolor="rgba(0,0,0,0)",
         )
-    else:
-        ground_truth_fig = go.Figure(
+    elif len(dataset.shape) == 2:
+        fig = go.Figure(
             data=go.Scatter(
                 x=dataset.coords.detach().numpy(),
                 y=dataset.values.detach().numpy(),
                 mode="lines",
             )
         )
+    else:
+        log.warning(
+            f"Dataset has {len(dataset.shape)} dimension(s).\
+            No visualization possible"
+        )
 
     # mlflow.log_figure(fig, f"ground_truth.html")
 
-    return {"ground_truth_fig": ground_truth_fig}
+    return {"ground_truth_fig": fig}

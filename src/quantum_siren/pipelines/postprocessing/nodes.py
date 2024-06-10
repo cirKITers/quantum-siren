@@ -55,6 +55,15 @@ def upscaling(model, coords, factor, shape):
             yaxis=dict(scaleanchor="x", autorange="reversed"),
             plot_bgcolor="rgba(0,0,0,0)",
         )
+    else:
+        model_output = model(coords).detach()
+        upscaled_coords = coords
+        pred_upscaled_fig = go.Figure()
+
+        log.warning(
+            f"Dataset has {len(shape)} dimension(s).\
+            No visualization possible"
+        )
 
     return {
         "pred_upscaled_fig": pred_upscaled_fig,
@@ -82,6 +91,12 @@ def pixelwise_difference(prediction, target, shape):
         pixelwise_diff_fig.update_layout(
             yaxis=dict(scaleanchor="x", autorange="reversed"),
             plot_bgcolor="rgba(0,0,0,0)",
+        )
+    else:
+        pixelwise_diff_fig = go.Figure()
+        log.warning(
+            f"Dataset has {len(shape)} dimension(s).\
+            No visualization possible"
         )
 
     return {"pixelwise_diff_fig": pixelwise_diff_fig}
@@ -255,9 +270,16 @@ def plot_gradients(model, target, coords, shape):
             yaxis=dict(scaleanchor="x", autorange="reversed"),
             plot_bgcolor="rgba(0,0,0,0)",
         )
-
     else:
-        raise ("Unknown dataset type")
+        pred_gradient_fig = go.Figure()
+        pred_laplacian_fig = go.Figure()
+        gt_gradient_fig = go.Figure()
+        gt_laplacian_fig = go.Figure()
+        log.warning(
+            f"Dataset has {len(shape)} dimension(s).\
+            No visualization possible"
+        )
+
     return {
         "pred_gradient_fig": pred_gradient_fig,
         "pred_laplacian_fig": pred_laplacian_fig,
@@ -337,7 +359,13 @@ def calculate_spectrum(values, shape):
             plot_bgcolor="rgba(0,0,0,0)",
         )
     else:
-        log.warning("Unknown shape: " + str(shape))
+        spectrum_abs_fig = go.Figure()
+        spectrum_phase_fig = go.Figure()
+        log.warning(
+            f"Dataset has {len(shape)} dimension(s).\
+            No visualization possible"
+        )
+
     return {
         "spectrum_abs_fig": spectrum_abs_fig,
         "spectrum_phase_fig": spectrum_phase_fig,

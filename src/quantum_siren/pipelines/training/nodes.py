@@ -8,12 +8,15 @@ from torchmetrics.image import StructuralSimilarityIndexMeasure, PeakSignalNoise
 from torch.utils.data import DataLoader
 
 import plotly.graph_objects as go
+from plotly.express import colors
 
 import mlflow
 import logging
 
 from .models import Model
 from .optimizer import QNG, Adam
+
+from ...helpers.visualization import add_opacity
 
 from typing import Dict
 
@@ -91,7 +94,6 @@ class Instructor:
             self.optim = Adam(params=self.model.parameters(), lr=learning_rate)
         else:
             raise KeyError(f"No optimizer {optimizer} in {optimizers}")
-        # self.optim = torch.optim.Adam(lr=learning_rate, params=self.model.parameters())
 
         self.metrics = {
             "mse": self.mse,
@@ -116,8 +118,6 @@ class Instructor:
             self.loss_sign = -1
         else:
             raise KeyError(f"No loss {loss} in {self.metrics}")
-
-        # del self.metrics[loss]
 
     def cost(self, *args: any) -> float:
         return self.loss(*args) * self.loss_sign
@@ -214,10 +214,8 @@ class Instructor:
     def set_sidelength(self, dataloader: DataLoader):
         if len(dataloader.dataset.shape) == 3:
             self.sidelength = dataloader.dataset.sidelength
-        elif len(dataloader.dataset.shape) == 2:
-            self.sidelength = -1
         else:
-            raise ValueError(f"Unsupported shape {dataloader.dataset.shape}")
+            self.sidelength = -1  # Indicate that we cannot use fft_ssim etc.
 
     def train(self, dataloader: DataLoader, steps: int):
         """
@@ -233,8 +231,8 @@ class Instructor:
         """
         self.set_sidelength(dataloader)
 
+        log.info(f"Training for {steps} steps")
         for step in range(steps):
-            metrics = {}
             loss_val = 0
 
             # Iterate the dataloader
@@ -262,10 +260,36 @@ class Instructor:
 
             # Report figures
             if not step % self.steps_till_summary:
-                if self.sidelength != -1:
+                fig = None
+                if len(dataloader.dataset.shape) == 4:
+
+                    fig = go.Figure(
+                        data=go.Scatter3d(
+                            x=dataloader.dataset.coords[:, 0],
+                            y=dataloader.dataset.coords[:, 1],
+                            z=dataloader.dataset.coords[:, 2],
+                            mode="markers",
+                            marker=dict(
+                                size=20 * pred.abs() + 1.0,
+                                color=pred,
+                                # colorscale=add_opacity(
+                                # colors.get_colorscale("Plasma")
+                                # ),  # choose a colorscale
+                                colorscale="Plasma",
+                                opacity=1.0,
+                            ),
+                        )
+                    )
+                    fig.update_layout(
+                        template="simple_white",
+                    )
+                elif len(dataloader.dataset.shape) == 3:
                     fig = go.Figure(
                         data=go.Heatmap(
-                            z=pred.view(self.sidelength, self.sidelength),
+                            z=pred.view(
+                                dataloader.dataset.sidelength,
+                                dataloader.dataset.sidelength,
+                            ),
                             colorscale="RdBu",
                             zmid=0,
                         )
@@ -274,7 +298,7 @@ class Instructor:
                         yaxis=dict(scaleanchor="x", autorange="reversed"),
                         plot_bgcolor="rgba(0,0,0,0)",
                     )
-                else:
+                elif len(dataloader.dataset.shape) == 2:
                     fig = go.Figure(
                         data=[
                             go.Scatter(
@@ -295,10 +319,16 @@ class Instructor:
                         yaxis=dict(range=[-1.1, 1.1]),
                         plot_bgcolor="rgba(0,0,0,0)",
                     )
+                else:
+                    log.warning(
+                        f"Dataset has {len(dataloader.dataset.shape)} dimension(s).\
+                        No visualization possible"
+                    )
 
-                # Report this figure directly to mlflow (not via kedro)
-                # to show progress in mlflow dashboard
-                mlflow.log_figure(fig, f"prediction_step_{step}.html")
+                if fig is not None:
+                    # Report this figure directly to mlflow (not via kedro)
+                    # to show progress in mlflow dashboard
+                    mlflow.log_figure(fig, f"prediction_step_{step}.html")
 
         return self.model
 
