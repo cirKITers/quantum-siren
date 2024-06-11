@@ -72,29 +72,47 @@ def upscaling(model, coords, factor, shape):
     }
 
 
-def upscaling_ground_truth(ground_truth, factor):
-    sidelength = int(math.sqrt(ground_truth.shape[0]))
-    upscaled_sidelength = int(sidelength * factor)
-
-    upscaled_gt = scipy.interpolate.RectBivariateSpline(
-        np.linspace(0, 1, sidelength),
-        np.linspace(0, 1, sidelength),
-        ground_truth.cpu().view(sidelength, sidelength).detach().numpy(),
-    )
-
-    gt_upscaled_fig = go.Figure(
-        data=go.Heatmap(
-            z=upscaled_gt(
-                np.linspace(0, 1, upscaled_sidelength),
-                np.linspace(0, 1, upscaled_sidelength),
-            ),
-            colorscale="RdBu",
-            zmid=0,
+def upscaling_ground_truth(ground_truth, factor, shape):
+    # 1-D case
+    if len(shape) == 2:
+        log.warning(
+            f"Dataset has {len(shape)} dimension(s).\
+            No visualization possible"
         )
-    )
-    gt_upscaled_fig.update_layout(
-        yaxis=dict(scaleanchor="x", autorange="reversed"), plot_bgcolor="rgba(0,0,0,0)"
-    )
+
+    # 2-D case
+    elif len(shape) == 3:
+        sidelength = int(math.sqrt(ground_truth.shape[0]))
+        upscaled_sidelength = int(sidelength * factor)
+
+        upscaled_gt = scipy.interpolate.RectBivariateSpline(
+            np.linspace(0, 1, sidelength),
+            np.linspace(0, 1, sidelength),
+            ground_truth.cpu().view(sidelength, sidelength).detach().numpy(),
+        )
+
+        gt_upscaled_fig = go.Figure(
+            data=go.Heatmap(
+                z=upscaled_gt(
+                    np.linspace(0, 1, upscaled_sidelength),
+                    np.linspace(0, 1, upscaled_sidelength),
+                ),
+                colorscale="RdBu",
+                zmid=0,
+            )
+        )
+        gt_upscaled_fig.update_layout(
+            yaxis=dict(scaleanchor="x", autorange="reversed"),
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+    else:
+        gt_upscaled_fig = go.Figure()
+        upscaled_gt = ground_truth
+
+        log.warning(
+            f"Dataset has {len(shape)} dimension(s).\
+            No visualization possible"
+        )
 
     return {
         "gt_upscaled_fig": gt_upscaled_fig,
