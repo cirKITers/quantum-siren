@@ -3,12 +3,13 @@ This is a boilerplate pipeline 'postprocessing'
 generated using Kedro 0.18.12
 """
 
+from quantum_siren.helpers.colors import hsv_to_rgb
+
 import torch
 import plotly.graph_objects as go
 import math
 import scipy
 import numpy as np
-import matplotlib.colors as colors
 import plotly.express as px
 
 from typing import Dict, Union, Tuple
@@ -417,7 +418,7 @@ def grads2img(
     grads_m = np.clip(grads_m, 0, 1)
 
     grads_hsv[:, :, 2] = grads_m
-    grads_rgb = colors.hsv_to_rgb(grads_hsv)
+    grads_rgb = hsv_to_rgb(grads_hsv)
 
     return grads_rgb
 
