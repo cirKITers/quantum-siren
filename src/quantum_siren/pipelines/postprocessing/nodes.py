@@ -10,6 +10,9 @@ import scipy
 import numpy as np
 import matplotlib.colors as colors
 import plotly.express as px
+
+from typing import Dict, Union, Tuple
+
 import logging
 
 log = logging.getLogger(__name__)
@@ -21,7 +24,22 @@ def predict(model, coords):
     return {"prediction": model_output.view(-1).detach()}
 
 
-def upscaling(model, coords, factor, shape):
+def upscaling(
+    model: torch.nn.Module, coords: torch.Tensor, factor: float, shape: torch.Size
+) -> Dict[str, Union[go.Figure, torch.Tensor]]:
+    """
+    Upscales the given coordinates using the given model.
+
+    Args:
+        model (torch.nn.Module): The model to use for upscaling.
+        coords (torch.Tensor): The coordinates to upscale.
+        factor (float): The factor by which to upscale the coordinates.
+        shape (torch.Size): The shape of the input data.
+
+    Returns:
+        Dict[str, Union[go.Figure, torch.Tensor]]: A dictionary containing the
+            upscaled figure, the upscaled image, and the upscaled coordinates.
+    """
     # 1-D case
     if len(shape) == 2:
         pred_upscaled_fig = go.Figure()
@@ -120,7 +138,23 @@ def upscaling_ground_truth(ground_truth, factor, shape):
     }
 
 
-def pixelwise_difference(prediction, target, shape):
+def pixelwise_difference(
+    prediction: torch.Tensor,  # shape: (N,) or (N, M)
+    target: torch.Tensor,  # shape: (N,) or (N, M)
+    shape: Tuple[int, ...],  # shape of the input data
+) -> Dict[str, go.Figure]:
+    """
+    Calculate the difference between the predicted and target values pixelwise.
+
+    Args:
+        prediction (torch.Tensor): Predicted values. Shape: (N,) or (N, M).
+        target (torch.Tensor): Target values. Shape: (N,) or (N, M).
+        shape (Tuple[int, ...]): Shape of the input data.
+
+    Returns:
+        Dict[str, go.Figure]: Dictionary containing the pixelwise difference figure.
+    """
+
     if len(shape) == 2:
         pixelwise_diff_fig = go.Figure()
     elif len(shape) == 3:
@@ -150,7 +184,21 @@ def pixelwise_difference(prediction, target, shape):
     return {"pixelwise_diff_fig": pixelwise_diff_fig}
 
 
-def plot_gradients(model, target, coords, shape):
+def plot_gradients(
+    model: torch.nn.Module,
+    target: torch.Tensor,
+    coords: torch.Tensor,
+    shape: Tuple[int, ...],
+) -> Dict[str, go.Figure]:
+    """Plots the gradients of the model.
+    Args:
+        model (torch.nn.Module): The model to be plotted.
+        target (torch.Tensor): The target values.
+        coords (torch.Tensor): The coordinates.
+        shape (Tuple[int, ...]): The shape of the input data.
+    Returns:
+        Dict[str, go.Figure]: A dictionary containing the plotted figures.
+    """
     coords.requires_grad = True
     pred = model(coords)
 
@@ -336,9 +384,21 @@ def plot_gradients(model, target, coords, shape):
     }
 
 
-def grads2img(grads_x, grads_y, sidelength):
+def grads2img(
+    grads_x: Union[torch.Tensor, np.ndarray],  # gradients along x-axis
+    grads_y: Union[torch.Tensor, np.ndarray],  # gradients along y-axis
+    sidelength: int,  # size of the resulting image
+) -> np.ndarray:  # resulting image
     """
-    Thankfully adapted from https://github.com/vsitzmann/siren/blob/master/dataio.py#L55
+    Convert gradients along x and y-axis into an image.
+
+    Args:
+        grads_x: Gradients along x-axis.
+        grads_y: Gradients along y-axis.
+        sidelength: Size of the resulting image.
+
+    Returns:
+        Image represented by an array of RGB values.
     """
     if type(grads_x) == torch.Tensor:
         grads_x = grads_x.detach().numpy()
@@ -362,9 +422,25 @@ def grads2img(grads_x, grads_y, sidelength):
     return grads_rgb
 
 
-def calculate_spectrum(values, shape):
+def calculate_spectrum(
+    values: Union[torch.Tensor, np.ndarray],  # input data
+    shape: Tuple[int, ...],  # shape of the input data
+) -> Dict[str, go.Figure]:  # dictionary of two go.Figure objects
+    """
+    Calculate the spectrum (absolute and phase) of the input data.
+
+    Args:
+        values: Input data.
+        shape: Shape of the input data.
+
+    Returns:
+        Dictionary with two go.Figure objects:
+            - spectrum_abs_fig: Heatmap of the logarithm of the absolute spectrum.
+            - spectrum_phase_fig: Heatmap of the phase spectrum.
+    """
     spectrum_abs_fig = go.Figure()
     spectrum_phase_fig = go.Figure()
+
     if len(shape) == 3:
         sidelength = int(math.sqrt(values.shape[0]))
 
@@ -407,8 +483,6 @@ def calculate_spectrum(values, shape):
             plot_bgcolor="rgba(0,0,0,0)",
         )
     else:
-        spectrum_abs_fig = go.Figure()
-        spectrum_phase_fig = go.Figure()
         log.warning(
             f"Dataset has {len(shape)} dimension(s).\
             No visualization possible"

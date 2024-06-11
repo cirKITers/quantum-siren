@@ -8,39 +8,40 @@ from torchmetrics.image import StructuralSimilarityIndexMeasure, PeakSignalNoise
 from torch.utils.data import DataLoader
 
 import plotly.graph_objects as go
-from plotly.express import colors
 
 import mlflow
-import logging
+
+from typing import Optional, List, Dict
 
 from .models import Model
 from .optimizer import QNG, Adam
 
 from ...helpers.visualization import add_opacity
 
-from typing import Dict
+
+import logging
+
+log = logging.getLogger(__name__)
 
 optimizers = {
     "QNG": QNG,
     "Adam": Adam,
 }
 
-log = logging.getLogger(__name__)
-
 
 class EarlyStopping:
-    def __init__(self, patience=15, min_delta=0.002):
-        self.patience = patience
-        self.min_delta = min_delta
-        self.counter = 0
-        self.best_loss = None
-        self.early_stop = False
-        self.loss_log = []
+    def __init__(self, patience: int = 15, min_delta: float = 0.002) -> None:
+        self.patience: int = patience
+        self.min_delta: float = min_delta
+        self.counter: int = 0
+        self.best_loss: Optional[float] = None
+        self.early_stop: bool = False
+        self.loss_log: List[float] = []
 
-    def ask(self, loss):
+    def ask(self, loss: float) -> bool:
         self.loss_log.append(loss)
         if len(self.loss_log) > self.patience:
-            var = torch.var(torch.tensor(self.loss_log[-self.patience :]))
+            var: torch.Tensor = torch.var(torch.tensor(self.loss_log[-self.patience :]))
         if self.best_loss is None:
             self.best_loss = loss
         elif self.best_loss - loss < self.min_delta:
