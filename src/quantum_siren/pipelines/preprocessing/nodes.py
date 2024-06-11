@@ -75,7 +75,8 @@ class ImageFitting(Dataset):
         Args:
             domain (Tuple[float, float]): (min, max) of data points.
             sidelength (int): Side length of the image.
-            nonlinear_coords (bool, optional): Normalize the coordinates of the input. Defaults to False.
+            nonlinear_coords (bool, optional): Normalize the coordinates of the input.
+            Defaults to False.
         """
         super().__init__()
         self.sidelength = sidelength
@@ -220,7 +221,8 @@ def extract_data(
         dataset (Dataset): The dataset to extract the data from.
 
     Returns:
-        Dict[str, Union[torch.Tensor, Tuple[int, int, int]]]: A dictionary containing the extracted data.
+        Dict[str, Union[torch.Tensor, Tuple[int, int, int]]]:
+        A dictionary containing the extracted data.
             The keys are:
                 - coords (torch.Tensor): The coordinates of the data.
                 - target (torch.Tensor): The target values of the data.
