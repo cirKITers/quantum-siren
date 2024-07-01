@@ -13,7 +13,7 @@ from plotly.express import colors
 import mlflow
 import logging
 
-from .models import Model
+from .models import TorchModel
 from .optimizer import QNG, Adam
 
 from ...helpers.visualization import add_opacity
@@ -98,7 +98,7 @@ class Instructor:
 
         self.steps_till_summary = report_figure_every_n_steps
 
-        self.model = Model(
+        self.model = TorchModel(
             n_qubits,
             shots,
             vqc_ansatz,

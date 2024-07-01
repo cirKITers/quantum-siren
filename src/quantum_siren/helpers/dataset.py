@@ -7,12 +7,13 @@ modo:
   filepath: modo.pt
   model: ExampleModel
 """
+
 from os.path import isfile, basename
 from typing import Any, Dict
 import torch
 from kedro.io import AbstractDataset
 
-from quantum_siren.pipelines.training.models import Model
+from quantum_siren.pipelines.training.models import TorchModel
 
 import mlflow
 
@@ -79,7 +80,7 @@ class TorchLocalModel(AbstractDataset):
         save_args: Dict[str, Any] = None,
     ) -> None:
         self._filepath = filepath
-        self._Model = Model
+        self._Model = TorchModel
         default_save_args = {}
         default_load_args = {}
 

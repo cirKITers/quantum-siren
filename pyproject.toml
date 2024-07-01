@@ -10,17 +10,24 @@ name = "torch_cpu"
 url = "https://download.pytorch.org/whl/cpu"
 priority = "explicit"
 
+
 [[tool.poetry.source]]
 name = "torch_gpu"
 url = "https://download.pytorch.org/whl/cu118"
 priority = "explicit"
 
+
+[[tool.poetry.source]]
+name = "quantum"
+url = "https://ea3a0fbb-599f-4d83-86f1-0e71abe27513.ka.bw-cloud-instance.org/lc3267/quantum/+simple/"
+priority = "supplemental"
+
 [tool.poetry.extras]
 gpu=["torchvision"]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
-pennylane = "^0.33.1"
+python = ">=3.11,<3.12"
+pennylane = "^0.36.0"
 pillow = "^10.3.0"
 scikit-image = "^0.21.0"
 ipykernel = "^6.25.0"
@@ -38,6 +45,7 @@ kedro-mlflow = "^0.12.2"
 plotly = "^5.15.0"
 black = "^24.4.2"
 kaleido = "0.2.1"
+qml-essentials = {version = "^0.1.0", source = "quantum"}
 
 
 

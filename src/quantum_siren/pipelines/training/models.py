@@ -1,4 +1,5 @@
 import pennylane as qml
+from pennylane import numpy as np
 
 import torch
 
@@ -8,8 +9,75 @@ import logging
 
 log = logging.getLogger(__name__)
 
+from qml_essentials import Model
 
-class Model(torch.nn.Module):
+
+class TorchModel(Model, torch.nn.Module):
+    def __init__(self, *args, **kwargs):
+        super(TorchModel, self).__init__(*args, **kwargs)
+
+        self.qnode = qml.QNode(self.circuit, self.dev, interface="torch")
+        self.qlayer = qml.qnn.TorchLayer(
+            self.qnode,
+            {"weights": self.params},
+        )
+
+    def circuit(self, weights, inputs=None, **kwargs):
+        if inputs is None:
+            inputs = self._inputs
+        else:
+            self._inputs = inputs
+        return self._circuit(params=weights, inputs=inputs, **kwargs)
+
+    def _iec(
+        self,
+        inputs: np.ndarray,
+        data_reupload: bool = True,
+    ) -> None:
+        """Encoding of two dimensional data using RX and RY gates.
+        The input is repeated across all qubits (vertically),
+        as specified by the shape of the input.
+
+        Args:
+            inputs (torch.Tensor | np.ndarray): Input data with the first value
+            parameterizing the RX gate and the second value parameterizing the RY gate.
+            Expects form to be [n_qubits, batch, 2]
+        """
+        assert data_reupload, "This model only supports data reuploading"
+
+        for qubit, qubit_params in enumerate(inputs):
+            if qubit_params.shape[1] == 1:
+                qml.RX(qubit_params[:, 0], wires=qubit)
+            elif qubit_params.shape[1] == 2:
+                qml.RX(qubit_params[:, 0], wires=qubit)
+                qml.RY(qubit_params[:, 1], wires=qubit)
+            elif qubit_params.shape[1] == 3:
+                qml.Rot(
+                    qubit_params[:, 0],
+                    qubit_params[:, 1],
+                    qubit_params[:, 2],
+                    wires=qubit,
+                )
+            else:
+                raise ValueError(
+                    "The number of parameters for this IEC cannot be greater than 3"
+                )
+
+    def predict(self, context, model_input):
+        if type(model_input) != torch.Tensor:
+            model_input = torch.tensor(model_input)
+        return self.forward(model_input)
+
+    def forward(self, model_input):
+        if self.output_interpretation < 0:
+            out = torch.mean(self.qlayer(model_input), axis=1)
+        else:
+            out = self.qlayer(model_input)
+
+        return out
+
+
+class TorchModelBckp(torch.nn.Module):
     # class Module(torch.nn.Module):
     def __init__(
         self,
