@@ -43,8 +43,9 @@ def create_pipeline(**kwargs) -> Pipeline:
     nd_upscaling_gt = node(
         upscaling_ground_truth,
         inputs={
-            "ground_truth": "ground_truth",
+            "ground_truth": "target",
             "factor": "params:upscale_factor",
+            "shape": "shape",
         },
         outputs={
             "gt_upscaled_fig": "gt_upscaled_fig",

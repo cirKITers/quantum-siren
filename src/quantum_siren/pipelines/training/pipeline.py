@@ -8,13 +8,6 @@ from .nodes import training, generate_instructor
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    # nd_generate_instructor = node(
-    #     generate_instructor,
-    #     inputs={
-    #     },
-    #     outputs={"instructor": "instructor"},
-    # )
-
     nd_training = node(
         training,
         inputs={
@@ -29,7 +22,6 @@ def create_pipeline(**kwargs) -> Pipeline:
             "optimizer": "params:optimizer",
             "output_interpretation": "params:output_interpretation",
             "loss": "params:loss",
-            # "instructor": "instructor",
             "dataloader": "dataloader",
             "steps": "params:steps",
             "seed": "params:seed",
