@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "Kedro: Default",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "kedro",
             "args": [
@@ -19,7 +19,7 @@
         },
         {
             "name": "Kedro: Slurm",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "kedro",
             "args": [

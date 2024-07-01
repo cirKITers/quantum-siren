@@ -59,7 +59,19 @@ which will open Kedro`s dashboard in you browser.
 
 The following parameters can be adjusted:
 - Data Preprocessing Parameters: `conf/base/parameters/preprocessing.yml`
-  - Image sidelength
+  - Batch size: 
+    - a number >0 indicating the batch size
+    - -1 to use all of the data as batch
+  - Mode: Type of dataset
+    - "cosine": Fourier series
+    - "image": Cameraman image
+  - Domain: Range for the input data that goes into the encoding gates
+  - Scale Domain by Pi: If the range shall be multiplied by Pi
+  - Specific for 'Image' Dataset
+    - Sidelength: Image sidelength
+    - Nonlinear Coordinates: If an arcsin shall be applied on the coordinates
+  - Specific for 'Cosine' Dataset
+    - Omega: Frequencies for the Fourier series. List of lists where the "outer" list determines the dimensionality and the "inner" list the frequencies for that dimension
 - Training Parameters: `conf/base/parameters/data_science.yml`
   - Number of qubits
   - Number of layers
