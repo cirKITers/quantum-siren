@@ -94,6 +94,9 @@ def upscaling(
 def upscaling_ground_truth(ground_truth, factor, shape):
     # 1-D case
     if len(shape) == 2:
+        gt_upscaled_fig = go.Figure()
+        upscaled_gt = ground_truth
+
         log.warning(
             f"Dataset has {len(shape)} dimension(s).\
             No visualization possible"
