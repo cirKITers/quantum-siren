@@ -8,12 +8,12 @@ model:
   filepath: data/06_models/model.pt
   load_args: 
       n_qubits: "${runtime_params:training.n_qubits, ${globals:training.n_qubits}}"
-      shots: "${runtime_params:training.shots, ${globals:training.shots}}"
-      vqc_ansatz: "${runtime_params:training.vqc_ansatz, ${globals:training.vqc_ansatz}}"
       n_layers: "${runtime_params:training.n_layers, ${globals:training.n_layers}}"
+      circuit_type: "${runtime_params:training.circuit_type, ${globals:training.circuit_type}}"
       data_reupload: "${runtime_params:training.data_reupload, ${globals:training.data_reupload}}"
-      output_qubit: "${runtime_params:training.output_qubit, ${globals:training.output_qubit}}"
       initialization: "${runtime_params:training.initialization, ${globals:training.initialization}}"
+      output_qubit: "${runtime_params:training.output_qubit, ${globals:training.output_qubit}}"
+      # shots: "${runtime_params:training.shots, ${globals:training.shots}}"
 
 # Intermediate Data
 
