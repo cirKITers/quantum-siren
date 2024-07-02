@@ -60,7 +60,7 @@ class Instructor:
         self,
         n_layers: int,
         n_qubits: int,
-        vqc_ansatz: str,
+        circuit_type: str,
         data_reupload: bool,
         learning_rate: float,
         shots: int,
@@ -77,7 +77,7 @@ class Instructor:
         Args:
             n_layers (int): Number of layers.
             n_qubits (int): Number of qubits.
-            vqc_ansatz (str): VQC ansatz.
+            circuit_type (str): VQC ansatz.
             iec_ansatz (str): IEC ansatz.
             data_reupload (bool): Flag for data reupload.
             learning_rate (float): Learning rate.
@@ -101,7 +101,7 @@ class Instructor:
         self.model = TorchModel(
             n_qubits=n_qubits,
             n_layers=n_layers,
-            circuit_type=vqc_ansatz,
+            circuit_type=circuit_type,
             # iec_ansatz,
             # shots,
             data_reupload=data_reupload,
@@ -369,7 +369,7 @@ class Instructor:
 def training(
     n_layers: int,
     n_qubits: int,
-    vqc_ansatz: str,
+    circuit_type: str,
     data_reupload: bool,
     learning_rate: float,
     shots: int,
@@ -389,7 +389,7 @@ def training(
     Parameters:
         n_layers (int): Number of layers
         n_qubits (int): Number of qubits
-        vqc_ansatz (str): VQC ansatz
+        circuit_type (str): VQC ansatz
         iec_ansatz (str): IEC ansatz
         data_reupload (bool): Data reupload flag
         learning_rate (float): Learning rate
@@ -409,7 +409,7 @@ def training(
     instructor = Instructor(
         n_layers,
         n_qubits,
-        vqc_ansatz,
+        circuit_type,
         data_reupload,
         learning_rate,
         shots,

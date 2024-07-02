@@ -109,7 +109,7 @@ class TorchModel(Model, torch.nn.Module):
 #         self,
 #         n_qubits: int,
 #         shots: int,
-#         vqc_ansatz: str,
+#         circuit_type: str,
 #         iec_ansatz: str,
 #         n_layers: int,
 #         data_reupload: bool,
@@ -129,7 +129,7 @@ class TorchModel(Model, torch.nn.Module):
 #         self._n_layers_p1 = n_layers + 1  # number of actual layers for weight init etc.
 
 #         self.iec = getattr(ansaetze, iec_ansatz, ansaetze.nothing)
-#         self.vqc = getattr(ansaetze, vqc_ansatz, ansaetze.nothing)
+#         self.vqc = getattr(ansaetze, circuit_type, ansaetze.nothing)
 
 #         if output_interpretation >= 0:
 #             output_interpretation = int(output_interpretation)

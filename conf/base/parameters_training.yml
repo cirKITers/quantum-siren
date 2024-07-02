@@ -1,7 +1,7 @@
 training: #see globals.yml for adjustment of n_qubits, n_layers,...
   n_qubits: 4
   n_layers: 14
-  vqc_ansatz: "Circuit_19" 
+  circuit_type: "Circuit_19" 
   data_reupload: 1.0
   learning_rate: 0.07
   shots: "None"

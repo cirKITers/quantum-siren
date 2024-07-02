@@ -13,7 +13,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         inputs={
             "n_layers": "params:n_layers",
             "n_qubits": "params:n_qubits",
-            "vqc_ansatz": "params:vqc_ansatz",
+            "circuit_type": "params:circuit_type",
             "data_reupload": "params:data_reupload",
             "learning_rate": "params:learning_rate",
             "shots": "params:shots",
