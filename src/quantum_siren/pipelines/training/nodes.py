@@ -61,16 +61,15 @@ class Instructor:
         n_layers: int,
         n_qubits: int,
         vqc_ansatz: str,
-        iec_ansatz: str,
         data_reupload: bool,
         learning_rate: float,
         shots: int,
         report_figure_every_n_steps: int,
         optimizer: str,
-        output_interpretation: str,
+        output_qubit: str,
+        initialization: str,
         loss: str,
         seed: int,
-        max_workers: int,
     ) -> None:
         """
         Initializes the object with the given parameters.
@@ -100,14 +99,14 @@ class Instructor:
         self.steps_till_summary = report_figure_every_n_steps
 
         self.model = TorchModel(
-            n_qubits,
-            shots,
-            vqc_ansatz,
-            iec_ansatz,
-            n_layers,
-            data_reupload,
-            output_interpretation,
-            max_workers,
+            n_qubits=n_qubits,
+            n_layers=n_layers,
+            circuit_type=vqc_ansatz,
+            # iec_ansatz,
+            # shots,
+            data_reupload=data_reupload,
+            output_qubit=output_qubit,
+            initialization=initialization,
         )
 
         self.earlyStopping = EarlyStopping()
@@ -367,46 +366,21 @@ class Instructor:
         return self.model
 
 
-def generate_instructor(
-    n_layers: int,
-    n_qubits: int,
-    vqc_ansatz: str,
-    iec_ansatz: str,
-    data_reupload: bool,
-    learning_rate: float,
-    shots: int,
-    report_figure_every_n_steps: int,
-) -> Dict[str, Instructor]:
-    instructor = Instructor(
-        n_layers,
-        n_qubits,
-        vqc_ansatz,
-        iec_ansatz,
-        data_reupload,
-        learning_rate,
-        shots,
-        report_figure_every_n_steps,
-    )
-
-    return {"instructor": instructor}
-
-
 def training(
     n_layers: int,
     n_qubits: int,
     vqc_ansatz: str,
-    iec_ansatz: str,
     data_reupload: bool,
     learning_rate: float,
     shots: int,
     report_figure_every_n_steps: int,
     optimizer: str,
-    output_interpretation: int,
+    output_qubit: int,
+    initialization: str,
     loss: str,
     dataloader,
     steps: int,
     seed: int,
-    max_workers: int,
 ):
     """
     A function to train a model using an instructor,
@@ -436,16 +410,15 @@ def training(
         n_layers,
         n_qubits,
         vqc_ansatz,
-        iec_ansatz,
         data_reupload,
         learning_rate,
         shots,
         report_figure_every_n_steps,
         optimizer,
-        output_interpretation,
+        output_qubit,
+        initialization,
         loss,
         seed,
-        max_workers,
     )
 
     model = instructor.train(dataloader, steps)
