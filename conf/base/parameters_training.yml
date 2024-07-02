@@ -1,9 +1,7 @@
 training: #see globals.yml for adjustment of n_qubits, n_layers,...
   n_qubits: 4
   n_layers: 14
-  #circuit_18, circuit_19, strongly_entangling_layers
-  vqc_ansatz: "circuit_19" 
-  iec_ansatz: "default"
+  vqc_ansatz: "Circuit_19" 
   data_reupload: 1.0
   learning_rate: 0.07
   shots: "None"
@@ -11,6 +9,6 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   steps: 400
   report_figure_every_n_steps: 50
   loss: "mse" #mse, fft_ssim, ssim, psnr
-  output_interpretation: 0 # -1 to use all qubits or a specific qubit number
+  output_qubit: 0 # -1 to use all qubits or a specific qubit number
+  initialization: "random"
   seed: 1111
-  max_workers: "None"
