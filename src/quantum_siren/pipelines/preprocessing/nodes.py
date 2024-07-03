@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader, Dataset
 
 from PIL import Image
-from torchvision.transforms import Resize, Compose, ToTensor, Normalize
+from torchvision.transforms import Resize, Compose, ToTensor, CenterCrop
 import skimage
 
 import plotly.graph_objects as go
@@ -29,7 +29,26 @@ def get_cameraman_tensor(sidelength: int) -> torch.Tensor:
         [
             Resize(sidelength),
             ToTensor(),
-            Normalize(torch.Tensor([0.5]), torch.Tensor([0.5])),
+        ]
+    )
+    img = transform(img)
+    return img
+
+
+def get_coffee_tensor(sidelength: int) -> torch.Tensor:
+    """
+    Args:
+        sidelength (int): The size of the side of the image.
+
+    Returns:
+        torch.Tensor: The camera image as a tensor.
+    """
+    img = Image.fromarray(skimage.data.coffee()).convert("L")
+    transform = Compose(
+        [
+            Resize(sidelength),
+            CenterCrop(sidelength),
+            ToTensor(),
         ]
     )
     img = transform(img)
@@ -70,6 +89,7 @@ class ImageFitting(Dataset):
         domain: Tuple[float, float],
         sidelength: int,
         nonlinear_coords: bool = False,
+        image: str = "cameraman",
     ) -> None:
         """
         Args:
@@ -81,7 +101,12 @@ class ImageFitting(Dataset):
         super().__init__()
         self.sidelength = sidelength
         self.shape = (sidelength, sidelength, 1)
-        img = get_cameraman_tensor(sidelength)
+        if image == "cameraman":
+            img = get_cameraman_tensor(sidelength)
+        elif image == "coffee":
+            img = get_coffee_tensor(sidelength)
+        else:
+            raise ValueError(f"Unknown image: {image}")
         values = img.permute(1, 2, 0).view(-1)
         self.coords = get_mgrid(domain, sidelength, 2)
 
@@ -100,7 +125,7 @@ class ImageFitting(Dataset):
         return self.coords[idx], self.values[idx]
 
 
-class CosineFitting(Dataset):
+class FourierSeriesFitting(Dataset):
     def __init__(self, domain: torch.Tensor, omega_d: torch.Tensor) -> None:
         if len(omega_d.shape) == 1:
             omega_d = omega_d.reshape(1, -1)
@@ -166,10 +191,12 @@ def generate_dataset(
 
     omega = torch.tensor(omega, dtype=torch.float)
 
-    if mode == "image":
-        dataset = ImageFitting(domain, sidelength, nonlinear_coords)
-    elif mode == "cosine":
-        dataset = CosineFitting(domain, omega)
+    if mode == "fourierSeries":
+        dataset = FourierSeriesFitting(domain, omega)
+    else:
+        dataset = ImageFitting(
+            domain, sidelength, nonlinear_coords=nonlinear_coords, image=mode
+        )
     return {"dataset": dataset}
 
 
