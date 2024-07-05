@@ -4,7 +4,7 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   circuit_type: "Circuit_19" 
   data_reupload: 1.0
   learning_rate: 0.07
-  shots: "None"
+  shots: -1
   optimizer: "Adam"
   steps: 400
   report_figure_every_n_steps: 50
@@ -12,3 +12,4 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   output_qubit: 0 # -1 to use all qubits or a specific qubit number
   initialization: "random"
   seed: 1111
+  early_stopping: False

@@ -25,6 +25,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             "dataloader": "dataloader",
             "steps": "params:steps",
             "seed": "params:seed",
+            "early_stopping": "params:early_stopping",
         },
         outputs={"model": "model"},
     )

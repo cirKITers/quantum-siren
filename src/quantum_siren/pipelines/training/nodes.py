@@ -70,6 +70,7 @@ class Instructor:
         initialization: str,
         loss: str,
         seed: int,
+        early_stopping: bool,
     ) -> None:
         """
         Initializes the object with the given parameters.
@@ -103,13 +104,16 @@ class Instructor:
             n_layers=n_layers,
             circuit_type=circuit_type,
             # iec_ansatz,
-            # shots,
+            shots=shots,
             data_reupload=data_reupload,
             output_qubit=output_qubit,
             initialization=initialization,
         )
 
-        self.earlyStopping = EarlyStopping()
+        if early_stopping:
+            self.earlyStopping = EarlyStopping()
+        else:
+            self.earlyStopping = None
 
         if optimizer == "QNG":
             self.optim = QNG(
@@ -359,7 +363,7 @@ class Instructor:
                     mlflow.log_figure(fig, f"prediction_step_{step}.html")
 
             # Early Stopping
-            if self.earlyStopping.ask(loss_val):
+            if self.earlyStopping is not None and self.earlyStopping.ask(loss_val):
                 log.info(f"Early stopping triggered in step {step}")
                 break
 
@@ -381,6 +385,7 @@ def training(
     dataloader,
     steps: int,
     seed: int,
+    early_stopping: bool,
 ):
     """
     A function to train a model using an instructor,
@@ -407,18 +412,19 @@ def training(
         dict: A dictionary containing the trained model
     """
     instructor = Instructor(
-        n_layers,
-        n_qubits,
-        circuit_type,
-        data_reupload,
-        learning_rate,
-        shots,
-        report_figure_every_n_steps,
-        optimizer,
-        output_qubit,
-        initialization,
-        loss,
-        seed,
+        n_layers=n_layers,
+        n_qubits=n_qubits,
+        circuit_type=circuit_type,
+        data_reupload=data_reupload,
+        learning_rate=learning_rate,
+        shots=shots,
+        report_figure_every_n_steps=report_figure_every_n_steps,
+        optimizer=optimizer,
+        output_qubit=output_qubit,
+        initialization=initialization,
+        loss=loss,
+        seed=seed,
+        early_stopping=early_stopping,
     )
 
     model = instructor.train(dataloader, steps)
