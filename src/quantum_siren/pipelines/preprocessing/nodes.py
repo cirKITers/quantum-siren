@@ -1,3 +1,5 @@
+import scipy
+import scipy.special
 import torch
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader, Dataset
@@ -44,6 +46,45 @@ def get_coffee_tensor(sidelength: int) -> torch.Tensor:
         torch.Tensor: The camera image as a tensor.
     """
     img = Image.fromarray(skimage.data.coffee()).convert("L")
+    transform = Compose(
+        [
+            Resize(sidelength),
+            CenterCrop(sidelength),
+            ToTensor(),
+        ]
+    )
+    img = transform(img)
+    return img
+
+
+def get_brick_tensor(sidelength: int) -> torch.Tensor:
+    """
+    Args:
+        sidelength (int): The size of the side of the image.
+
+    Returns:
+        torch.Tensor: The camera image as a tensor.
+    """
+    img = Image.fromarray(skimage.data.brick())
+    transform = Compose(
+        [
+            Resize(sidelength),
+            ToTensor(),
+        ]
+    )
+    img = transform(img)
+    return img
+
+
+def get_cat_tensor(sidelength: int) -> torch.Tensor:
+    """
+    Args:
+        sidelength (int): The size of the side of the image.
+
+    Returns:
+        torch.Tensor: The camera image as a tensor.
+    """
+    img = Image.fromarray(skimage.data.cat())
     transform = Compose(
         [
             Resize(sidelength),
@@ -142,14 +183,42 @@ class FourierSeriesFitting(Dataset):
         self.coords: torch.Tensor = get_mgrid(domain, n_d, dim=omega_d.shape[0])
 
         # Formula (4) in referenced paper 2309.03279
-        def y(x: torch.Tensor) -> torch.Tensor:
+        def f(x: torch.Tensor) -> torch.Tensor:
             return (
                 1
                 / torch.linalg.norm(omega_d)
                 * torch.sum(torch.cos(omega_d.T * x))  # transpose!
             )
 
-        self.values: torch.Tensor = torch.stack([y(x) for x in self.coords])
+        self.values: torch.Tensor = torch.stack([f(x) for x in self.coords])
+
+    def __len__(self) -> int:
+        assert len(self.coords) == len(self.values)
+        return len(self.coords)
+
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        return self.coords[idx], self.values[idx]
+
+
+class HelmholtzSource(Dataset):
+    def __init__(self, domain: torch.Tensor, sidelength: int) -> None:
+        self.sidelength = sidelength
+        self.shape = (self.sidelength, self.sidelength, 1)
+
+        self.coords: torch.Tensor = get_mgrid(domain, 200, dim=2)
+        self.sigma = 1e-4
+        self.wavenumber = 20.0
+
+        x0 = 0
+        y0 = 0
+
+        # Formula (4) in referenced paper 2309.03279
+        def f(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+            return scipy.special.hankel2(
+                0, self.wavenumber * torch.sqrt((x - x0) ** 2 + (y - y0) ** 2) + 1e-6
+            )
+
+        self.values: torch.Tensor = torch.stack([f(x) for x in self.coords])
 
     def __len__(self) -> int:
         assert len(self.coords) == len(self.values)
@@ -193,9 +262,14 @@ def generate_dataset(
 
     if mode == "fourierSeries":
         dataset = FourierSeriesFitting(domain, omega)
-    else:
+    elif mode == "helmholtz":
+        dataset = HelmholtzSource(domain, omega)
+    elif mode.startswith("image_"):
         dataset = ImageFitting(
-            domain, sidelength, nonlinear_coords=nonlinear_coords, image=mode
+            domain,
+            sidelength,
+            nonlinear_coords=nonlinear_coords,
+            image=mode.replace("image_", ""),
         )
     return {"dataset": dataset}
 
