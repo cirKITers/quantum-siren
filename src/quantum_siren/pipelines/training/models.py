@@ -17,13 +17,17 @@ class TorchModel(Model, torch.nn.Module):
         Model.__init__(self, *args, **kwargs)
         torch.nn.Module.__init__(self)
 
-        self.qnode = qml.QNode(self.circuit, self.dev, interface="torch")
+        self.qnode = qml.QNode(
+            self._torch_circuit,
+            qml.device("default.qubit", shots=self.shots, wires=self.n_qubits),
+            interface="torch",
+        )
         self.qlayer = qml.qnn.TorchLayer(
             self.qnode,
             {"params": self.params.shape},
         )
 
-    def circuit(self, params, inputs=None):
+    def _torch_circuit(self, params, inputs=None):
         if inputs is None:
             inputs = self._inputs
         else:

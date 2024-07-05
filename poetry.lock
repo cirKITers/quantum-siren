@@ -3027,13 +3027,13 @@ cffi = {version = "*", markers = "implementation_name == \"pypy\""}
 
 [[package]]
 name = "qml-essentials"
-version = "0.1.0"
+version = "0.1.8"
 description = ""
 optional = false
 python-versions = ">=3.11,<4.0"
 files = [
-    {file = "qml_essentials-0.1.0-py3-none-any.whl", hash = "sha256:a07adb951cd949dfe45cd48f10a75265ab91836fca1c378e3b807914a01e17f3"},
-    {file = "qml_essentials-0.1.0.tar.gz", hash = "sha256:908df62fbdee3ab5e9f6409dff673b42450eb7e45c392c1c6ba62b34227fac75"},
+    {file = "qml_essentials-0.1.8-py3-none-any.whl", hash = "sha256:c32b88a61128e0f2a126a8b623fc6564a54b31265b74301e4b21a5719a5e51bc"},
+    {file = "qml_essentials-0.1.8.tar.gz", hash = "sha256:d46299ffd089d8a3d95aadd5555ef6cf455570fb91f049be0a62a5dc3e5dfd87"},
 ]
 
 [package.dependencies]
@@ -3951,4 +3951,4 @@ gpu = ["torchvision"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "0f495253c298249c94c21a3495f9e9e133aef72fe3244bc9603eef06a340dca5"
+content-hash = "23ffb7e4ef0ab099d235e03572ec28c453370eb09ca932d460abb3d4fc0f1e95"
