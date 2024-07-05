@@ -1,6 +1,6 @@
 preprocessing:
   batch_size: -1
-  mode: "cosine" # image, cosine
+  mode: "image_coffee" # image_cameraman, image_coffee, image_cat, image_brick, fourierSeries, helmholtz
   domain: [-0.7,0.7] # domain of x values
   scale_domain_by_pi: True
 
