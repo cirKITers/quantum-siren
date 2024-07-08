@@ -99,10 +99,16 @@ class TorchModel(Model, torch.nn.Module):
         return self.forward(model_input)
 
     def forward(self, model_input):
+        def call_qlayer(inputs):
+            return torch.stack(
+                [qlayer(inputs[:, l]) for qlayer, l in zip(self.qlayers, model_input)],
+                axis=1,
+            )
+
         if self.output_qubit < 0:
-            out = torch.mean(self.qlayer(model_input), axis=1)
+            out = torch.mean(call_qlayer(model_input), axis=1)
         else:
-            out = self.qlayer(model_input)
+            out = call_qlayer(model_input)
 
         return out
 
