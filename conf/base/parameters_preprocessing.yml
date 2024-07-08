@@ -15,4 +15,4 @@ preprocessing:
   # Frequencies for the fourier series
   # Up to 3 dim allowed but each dimension must have the same length.
   # Different lenghts are supported by using '0's as placeholder
-  omega: [[1.0,2.0,3.0,4.0]] 
+  omega: [[1.0,2.0,3.0,4.0], [1.0,2.0,3.0,0.0], [1.0,2.0,0.0,0.0]] 
