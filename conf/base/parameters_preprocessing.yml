@@ -4,8 +4,9 @@ preprocessing:
   domain: [-0.7,0.7] # domain of x values
   scale_domain_by_pi: True
 
-  # 'image' mode parameter
-  sidelength: 11
+  # 'helmholtz' parameters
+  wavenumber: 4
+
   nonlinear_coords: False
 
   # 'cosine' mode parameter

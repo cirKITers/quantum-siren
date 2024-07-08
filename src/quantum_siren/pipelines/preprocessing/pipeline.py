@@ -22,6 +22,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             "sidelength": "params:sidelength",
             "nonlinear_coords": "params:nonlinear_coords",
             "omega": "params:omega",
+            "wavenumber": "params:wavenumber",
         },
         outputs={"dataset": "dataset"},
     )
