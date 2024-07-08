@@ -16,7 +16,7 @@ from typing import Optional, List, Dict
 from .models import TorchModel
 from .optimizer import QNG, Adam
 
-from ...helpers.visualization import add_opacity
+from ...helpers.visualization import generate_figure
 
 
 import logging
@@ -239,6 +239,8 @@ class Instructor:
             Returns:
                 torch.Tensor: The mean squared error value.
         """
+        if len(target.shape) > 1:
+            target = target[:, 0]
         val = ((pred - target) ** 2).mean()
 
         return val
@@ -288,73 +290,28 @@ class Instructor:
             targets = dataloader.dataset.values
 
             for name, metric in self.metrics.items():
-                mlflow.log_metric(name, metric(pred, targets) / len(dataloader), step)
+                if len(targets.shape) > 1:
+                    mlflow.log_metric(
+                        name, metric(pred, targets[:, 0]) / len(dataloader), step
+                    )
+                else:
+                    mlflow.log_metric(
+                        name, metric(pred, targets) / len(dataloader), step
+                    )
 
             # Report figures
             if not step % self.steps_till_summary:
-                fig = None
-                if len(dataloader.dataset.shape) == 4:
+                if len(targets.shape) > 1:
 
-                    fig = go.Figure(
-                        data=go.Scatter3d(
-                            x=dataloader.dataset.coords[:, 0],
-                            y=dataloader.dataset.coords[:, 1],
-                            z=dataloader.dataset.coords[:, 2],
-                            mode="markers",
-                            marker=dict(
-                                size=20 * pred.abs() + 1.0,
-                                color=pred,
-                                # colorscale=add_opacity(
-                                # colors.get_colorscale("Plasma")
-                                # ),  # choose a colorscale
-                                colorscale="Plasma",
-                                opacity=1.0,
-                            ),
-                        )
-                    )
-                    fig.update_layout(
-                        template="simple_white",
-                    )
-                elif len(dataloader.dataset.shape) == 3:
-                    fig = go.Figure(
-                        data=go.Heatmap(
-                            z=pred.view(
-                                dataloader.dataset.sidelength,
-                                dataloader.dataset.sidelength,
-                            ),
-                            colorscale="RdBu",
-                            zmid=0,
-                        )
-                    )
-                    fig.update_layout(
-                        yaxis=dict(scaleanchor="x", autorange="reversed"),
-                        plot_bgcolor="rgba(0,0,0,0)",
-                    )
-                elif len(dataloader.dataset.shape) == 2:
-                    fig = go.Figure(
-                        data=[
-                            go.Scatter(
-                                x=coords.flatten(),
-                                y=pred,
-                                mode="lines",
-                                name="Prediction",
-                            ),
-                            go.Scatter(
-                                x=coords.flatten(),
-                                y=targets,
-                                mode="lines",
-                                name="Target",
-                            ),
-                        ]
-                    )
-                    fig.update_layout(
-                        yaxis=dict(range=[-1.1, 1.1]),
-                        plot_bgcolor="rgba(0,0,0,0)",
-                    )
-                else:
-                    log.warning(
-                        f"Dataset has {len(dataloader.dataset.shape)} dimension(s).\
-                        No visualization possible"
+                    fig = generate_figure(
+                        shape=[
+                            dataloader.dataset.shape[0],
+                            dataloader.dataset.shape[1],
+                            1,
+                        ],
+                        coords=dataloader.dataset.coords,
+                        values=pred,
+                        sidelength=dataloader.dataset.sidelength,
                     )
 
                 if fig is not None:
