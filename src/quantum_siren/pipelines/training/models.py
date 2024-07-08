@@ -13,7 +13,7 @@ from qml_essentials.model import Model
 
 
 class TorchModel(Model, torch.nn.Module):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, outputs=1, **kwargs):
         Model.__init__(self, *args, **kwargs)
         torch.nn.Module.__init__(self)
 
@@ -22,10 +22,22 @@ class TorchModel(Model, torch.nn.Module):
             qml.device("default.qubit", shots=self.shots, wires=self.n_qubits),
             interface="torch",
         )
-        self.qlayer = qml.qnn.TorchLayer(
-            self.qnode,
-            {"params": self.params.shape},
-        )
+        # self.qnodes = [
+        #     qml.QNode(
+        #         self._torch_circuit,
+        #         qml.device("default.qubit", shots=self.shots, wires=self.n_qubits),
+        #         interface="torch",
+        #     )
+        #     for _ in range(outputs)
+        # ]
+
+        self.qlayer = qml.qnn.TorchLayer(self.qnode, {"params": self.params.shape})
+        # self.qlayers = [
+        #     qml.qnn.TorchLayer(qnode, {"params": self.params.shape})
+        #     for qnode in self.qnodes
+        # ]
+
+        pass
 
     def _torch_circuit(self, params, inputs=None):
         if inputs is None:
