@@ -11,6 +11,8 @@ import skimage
 import plotly.graph_objects as go
 from typing import Tuple, Union, Dict
 
+from quantum_siren.helpers.visualization import generate_figure
+
 import logging
 
 log = logging.getLogger(__name__)
@@ -201,13 +203,13 @@ class FourierSeriesFitting(Dataset):
 
 
 class HelmholtzSource(Dataset):
-    def __init__(self, domain: torch.Tensor, sidelength: int) -> None:
+    def __init__(self, domain: torch.Tensor, sidelength: int, wavenumber: int) -> None:
         self.sidelength = sidelength
-        self.shape = (self.sidelength, self.sidelength, 1)
+        self.shape = (self.sidelength, self.sidelength, 2)
 
-        self.coords: torch.Tensor = get_mgrid(domain, 200, dim=2)
+        self.coords: torch.Tensor = get_mgrid(domain, sidelength, dim=2)
         self.sigma = 1e-4
-        self.wavenumber = 20.0
+        self.wavenumber = wavenumber
 
         x0 = 0
         y0 = 0
@@ -218,10 +220,13 @@ class HelmholtzSource(Dataset):
                 0, self.wavenumber * torch.sqrt((x - x0) ** 2 + (y - y0) ** 2) + 1e-6
             )
 
-        self.values: torch.Tensor = torch.stack([f(x) for x in self.coords])
+        field = torch.stack([f(x[0], x[1]) for x in self.coords])
+
+        self.values: torch.Tensor = torch.stack([field.real, field.imag]).view(-1, 2)
 
     def __len__(self) -> int:
         assert len(self.coords) == len(self.values)
+        assert self.coords.shape[1] == 2
         return len(self.coords)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -235,6 +240,7 @@ def generate_dataset(
     sidelength: int,
     nonlinear_coords: bool,
     omega: Tuple[float, ...],
+    wavenumber: int,
 ) -> Dict[str, Dataset]:
     """
     Generate a dataset based on the input parameters.
@@ -263,7 +269,7 @@ def generate_dataset(
     if mode == "fourierSeries":
         dataset = FourierSeriesFitting(domain, omega)
     elif mode == "helmholtz":
-        dataset = HelmholtzSource(domain, omega)
+        dataset = HelmholtzSource(domain, sidelength=sidelength, wavenumber=wavenumber)
     elif mode.startswith("image_"):
         dataset = ImageFitting(
             domain,
@@ -347,49 +353,11 @@ def gen_ground_truth_fig(dataset: Dataset) -> Dict[str, go.Figure]:
         Dict[str, go.Figure]: A dictionary containing the generated figure.
             The key is "ground_truth_fig".
     """
-    if len(dataset.shape) == 4:
-
-        fig = go.Figure(
-            data=go.Scatter3d(
-                x=dataset.coords[:, 0],
-                y=dataset.coords[:, 1],
-                z=dataset.coords[:, 2],
-                mode="markers",
-                marker=dict(
-                    size=20 * dataset.values.abs() + 1.0,
-                    color=dataset.values,
-                    colorscale="Plasma",
-                    opacity=1.0,
-                ),
-            )
+    return {
+        "ground_truth_fig": generate_figure(
+            shape=dataset.shape,
+            coords=dataset.coords,
+            values=dataset.values,
+            sidelength=dataset.sidelength,
         )
-        fig.update_layout(
-            template="simple_white",
-        )
-    elif len(dataset.shape) == 3:
-        sidelength = dataset.sidelength
-        fig = go.Figure(
-            data=go.Heatmap(
-                z=dataset.values.view(sidelength, sidelength).detach().numpy(),
-                colorscale="RdBu",
-                zmid=0,
-            )
-        )
-        fig.update_layout(
-            yaxis=dict(scaleanchor="x", autorange="reversed"),
-            plot_bgcolor="rgba(0,0,0,0)",
-        )
-    elif len(dataset.shape) == 2:
-        fig = go.Figure(
-            data=go.Scatter(
-                x=dataset.coords.detach().numpy(),
-                y=dataset.values.detach().numpy(),
-                mode="lines",
-            )
-        )
-    else:
-        log.warning(
-            f"Dataset has {len(dataset.shape)} dimension(s). No visualization possible"
-        )
-
-    return {"ground_truth_fig": fig}
+    }
