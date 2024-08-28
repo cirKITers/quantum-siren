@@ -148,6 +148,8 @@ class ImageFitting(Dataset):
             img = get_cameraman_tensor(sidelength)
         elif image == "coffee":
             img = get_coffee_tensor(sidelength)
+        elif image == "brick":
+            img = get_brick_tensor(sidelength)
         else:
             raise ValueError(f"Unknown image: {image}")
         values = img.permute(1, 2, 0).view(-1)
@@ -157,7 +159,7 @@ class ImageFitting(Dataset):
         if nonlinear_coords:
             self.coords = (torch.asin(self.coords) + torch.pi / 2) / 2
 
-        self.values = minmax_scaler(values, -1, 1)
+        self.values = minmax_scaler(values, domain[0], domain[1])
 
     def __len__(self) -> int:
         assert len(self.coords) == len(self.values)
