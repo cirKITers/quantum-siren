@@ -15,7 +15,12 @@ def add_opacity(colorscale):
     return colorscale
 
 
-def generate_figure(shape, coords, values, sidelength=None):
+def generate_figure(
+    shape,
+    coords,
+    values,
+    sidelength=None,
+):
     if len(shape) == 4:
 
         fig = go.Figure(
@@ -44,14 +49,14 @@ def generate_figure(shape, coords, values, sidelength=None):
             fig.add_trace(
                 go.Heatmap(
                     z=values[:, c].view(sidelength, sidelength).detach().numpy(),
-                    colorscale="RdBu",
-                    zmid=0,
+                    colorscale="gray",  # "RdBu",
+                    zmid=coords.mean().item(),
                 ),
                 1,
                 c + 1,  # always start from 1
             )
         fig.update_layout(
-            yaxis=dict(autorange="reversed"),
+            yaxis=dict(autorange="reversed", scaleanchor="x"),
             plot_bgcolor="rgba(0,0,0,0)",
         )
     elif len(shape) == 2:
