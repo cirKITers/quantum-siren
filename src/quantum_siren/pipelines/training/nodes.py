@@ -13,7 +13,7 @@ import mlflow
 
 from typing import Optional, List, Dict
 
-from .models import TorchModel
+from .models import TorchModel, TorchReluModel
 from .optimizer import QNG, Adam
 
 from ...helpers.visualization import generate_figure
@@ -109,7 +109,14 @@ class Instructor:
             output_qubit=output_qubit,
             initialization=initialization,
         )
-
+        dummy = False
+        self.dummyModel = None
+        if dummy:
+            self.dummyModel = TorchReluModel(
+                n_inputs=2, n_hidden=100, n_layers=self.model.degree
+            )
+            # model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+            # params = sum([torch.prod(p.size()) for p in model_parameters])
         if early_stopping:
             self.earlyStopping = EarlyStopping()
         else:
@@ -124,6 +131,8 @@ class Instructor:
             )
         elif optimizer == "Adam":
             self.optim = Adam(params=self.model.parameters(), lr=learning_rate)
+            if self.dummyModel:
+                self.optim = Adam(params=self.dummyModel.parameters(), lr=learning_rate)
         else:
             raise KeyError(f"No optimizer {optimizer} in {optimizers}")
 
@@ -239,7 +248,7 @@ class Instructor:
             Returns:
                 torch.Tensor: The mean squared error value.
         """
-        if len(target.shape) > 1:
+        if len(target.shape) > 1:  # TODO: remove once channels are supported
             target = target[:, 0]
         val = ((pred - target) ** 2).mean()
 
@@ -271,7 +280,10 @@ class Instructor:
 
             # Iterate the dataloader
             for coord, target in iter(dataloader):
-                pred = self.model(coord)
+                if self.dummyModel is not None:
+                    pred = self.dummyModel(coord)
+                else:
+                    pred = self.model(coord)
 
                 loss = self.cost(pred, target)
 
@@ -286,7 +298,10 @@ class Instructor:
 
             # Retrieve coordinates, predictions and target for reporting
             coords = dataloader.dataset.coords
-            pred = self.model(coords).cpu().detach()
+            if self.dummyModel is not None:
+                pred = self.dummyModel(coord).cpu().detach()
+            else:
+                pred = self.model(coord).cpu().detach()
             targets = dataloader.dataset.values
 
             for name, metric in self.metrics.items():
@@ -301,18 +316,16 @@ class Instructor:
 
             # Report figures
             if not step % self.steps_till_summary:
-                if len(targets.shape) > 1:
-
-                    fig = generate_figure(
-                        shape=[
-                            dataloader.dataset.shape[0],
-                            dataloader.dataset.shape[1],
-                            1,
-                        ],
-                        coords=dataloader.dataset.coords,
-                        values=pred,
-                        sidelength=dataloader.dataset.sidelength,
-                    )
+                fig = generate_figure(
+                    shape=[
+                        dataloader.dataset.shape[0],
+                        dataloader.dataset.shape[1],
+                        1,  # TODO: remove once channels are supported
+                    ],
+                    coords=dataloader.dataset.coords,
+                    values=pred,
+                    sidelength=dataloader.dataset.sidelength,
+                )
 
                 if fig is not None:
                     # Report this figure directly to mlflow (not via kedro)
