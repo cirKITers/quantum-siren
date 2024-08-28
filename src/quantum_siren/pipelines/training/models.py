@@ -12,6 +12,33 @@ log = logging.getLogger(__name__)
 from qml_essentials.model import Model
 
 
+class TorchReluModel(torch.nn.Module):
+    def __init__(
+        self,
+        n_inputs,
+        n_hidden,
+        n_layers,
+    ):
+        super().__init__()
+
+        # self.model = torch.nn.Sequential(
+        #     torch.nn.Linear(n_inputs, n_hidden, bias=False),
+        #     *[torch.nn.Linear(n_hidden, n_hidden, bias=False), torch.nn.ReLU()]
+        #     * (n_layers - 1),
+        #     torch.nn.Linear(n_hidden, 1),
+        #     torch.nn.ReLU(),
+        # )
+        self.model = torch.nn.Sequential(
+            torch.nn.Linear(n_inputs, n_hidden),
+            torch.nn.ReLU(),
+            torch.nn.Linear(n_hidden, 1),
+            torch.nn.ReLU(),
+        )
+
+    def forward(self, x):
+        return self.model(x).flatten()
+
+
 class TorchModel(Model, torch.nn.Module):
     def __init__(self, *args, outputs=1, **kwargs):
         Model.__init__(self, *args, **kwargs)
@@ -112,10 +139,11 @@ class TorchModel(Model, torch.nn.Module):
 
     def forward(self, model_input):
         def call_qlayer(inputs):
-            return torch.stack(
-                [qlayer(inputs[:, l]) for qlayer, l in zip(self.qlayers, model_input)],
-                axis=1,
-            )
+            # return torch.stack(
+            #     [qlayer(inputs[:, l]) for qlayer, l in zip(self.qlayers, model_input)],
+            #     axis=1,
+            # )
+            return self.qlayer(inputs)
 
         if self.output_qubit < 0:
             out = torch.mean(call_qlayer(model_input), axis=1)
