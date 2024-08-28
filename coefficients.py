@@ -34,7 +34,7 @@ def calculate_coefficients(n_qubits, n_layers, noise_factor=0.01):
 max_n = 7
 n_qubits = 3
 samples = 200
-max_noise = 0.1
+max_noise = 0.03
 
 
 def sample_coefficients(n_qubits, n_layers, noise_factor=0.01):
@@ -117,9 +117,10 @@ fig.update_layout(
     yaxis_title="Variance of HF Coefficient (abs)",
     title=f"Variance of Coefficients for {ansatz}",
     template="simple_white",
-    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.71),
+    legend=dict(yanchor="top", y=1.0, xanchor="left", x=0.71),
 )
 fig.update_yaxes(type="log")
 fig.show()
+fig.write_image("coefficients.png")
 # print(coeffs_plr.var(axis=1))
 input()
