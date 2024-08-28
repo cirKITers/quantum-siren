@@ -1,14 +1,14 @@
 preprocessing:
-  batch_size: -1
-  mode: "helmholtz" # image_cameraman, image_coffee, image_cat, image_brick, fourierSeries, helmholtz
-  domain: [-0.7,0.7] # domain of x values
+  batch_size: -1 # -1 for full dataset    
+  mode: "image_cameraman" # image_cameraman, image_coffee, image_cat, image_brick, fourierSeries, helmholtz
+  domain: [0,1] # domain of x values
   scale_domain_by_pi: True
 
   # 'helmholtz' parameters
   wavenumber: 4
 
-  # 'image' and 'helmholtz' mode parameter
-  sidelength: 27
+  'image' and 'helmholtz' mode paraqmeter
+  sidelength: 14
   nonlinear_coords: False
 
   # 'cosine' mode parameter
