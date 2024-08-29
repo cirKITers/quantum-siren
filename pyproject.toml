@@ -27,7 +27,6 @@ gpu=["torchvision"]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
-pennylane = "^0.36.0"
 pillow = "^10.3.0"
 scikit-image = "^0.21.0"
 ipykernel = "^6.25.0"
@@ -45,7 +44,7 @@ plotly = "^5.22.0"
 black = "^24.4.2"
 kaleido = "0.2.1"
 mlflow = "^2.13.2"
-qml-essentials = "^0.1.8"
+qml-essentials = "^0.1.13"
 
 
 
