@@ -159,7 +159,7 @@ class ImageFitting(Dataset):
         if nonlinear_coords:
             self.coords = (torch.asin(self.coords) + torch.pi / 2) / 2
 
-        self.values = minmax_scaler(values, domain[0], domain[1])
+        self.values = minmax_scaler(values, -1, 1)
 
     def __len__(self) -> int:
         assert len(self.coords) == len(self.values)
