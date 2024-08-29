@@ -50,7 +50,7 @@ def generate_figure(
                 go.Heatmap(
                     z=values[:, c].view(sidelength, sidelength).detach().numpy(),
                     colorscale="gray",  # "RdBu",
-                    zmid=coords.mean().item(),
+                    # zmid=coords.mean().item(),
                 ),
                 1,
                 c + 1,  # always start from 1
