@@ -6,8 +6,7 @@ generated using Kedro 0.18.12
 import torch
 from torchmetrics.image import StructuralSimilarityIndexMeasure, PeakSignalNoiseRatio
 from torch.utils.data import DataLoader
-
-import plotly.graph_objects as go
+from rich.progress import track
 
 import mlflow
 
@@ -275,7 +274,7 @@ class Instructor:
         self.set_sidelength(dataloader)
 
         log.info(f"Training for {steps} steps")
-        for step in range(steps):
+        for step in track(range(steps), description="Training"):
             loss_val = 0
 
             # Iterate the dataloader
