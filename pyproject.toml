@@ -69,3 +69,6 @@ addopts = """
 fail_under = 0
 show_missing = true
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+
+[tool.kedro_telemetry]
+project_id = "92e513183fe94755a8ab9349dcf5d31d"
