@@ -9,7 +9,7 @@ training: #see globals.yml for adjustment of n_qubits, n_layers,...
   steps: 400
   report_figure_every_n_steps: 50
   loss: "mse" #mse, fft_ssim, ssim, psnr
-  output_qubit: 0 # -1 to use all qubits or a specific qubit number
+  output_qubit: -1 # -1 to use all qubits or a specific qubit number
   initialization: "random"
   seed: 1111
   early_stopping: False
